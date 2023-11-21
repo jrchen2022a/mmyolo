@@ -108,6 +108,10 @@ data
 .vscode
 .idea
 .DS_Store
+._*
+mmdet/
+mmengine/
+mmcv/
 
 # custom
 *.pkl
