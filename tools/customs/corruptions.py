@@ -8,7 +8,8 @@ import skimage as sk
 from scipy.ndimage import zoom as scizoom
 
 
-class Corruptions():
+class Corruptions:
+
     @staticmethod
     def __disk(radius, alias_blur=0.1, dtype=np.float32):
         if radius <= 8:
@@ -305,6 +306,11 @@ class Corruptions():
 
         return reconstructed_img
 
+corruption_methods = {
+    'guassian_noise': Corruptions.apply_gaussian_noise,
+    'shot_noise': Corruptions.apply_shot_noise,
+    'impulse_noise': Corruptions.apply_impulse_noise
+}
 
 if __name__ == "__main__":
     # 加载图像
