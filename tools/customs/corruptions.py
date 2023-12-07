@@ -309,7 +309,19 @@ class Corruptions:
 corruption_methods = {
     'guassian_noise': Corruptions.apply_gaussian_noise,
     'shot_noise': Corruptions.apply_shot_noise,
-    'impulse_noise': Corruptions.apply_impulse_noise
+    'impulse_noise': Corruptions.apply_impulse_noise,
+    'defocus_blur': Corruptions.apply_defocus_blur,
+    'frosted_glass_blur': Corruptions.apply_frosted_glass_blur,
+    'motion_blur': Corruptions.apply_motion_blur,
+    'zoom_blur': Corruptions.apply_zoom_blur,
+    'snow': Corruptions.apply_snow,
+    'rain': Corruptions.apply_rain,
+    'fog': Corruptions.apply_fog,
+    'brightness': Corruptions.apply_brightness,
+    'contrast': Corruptions.apply_contrast,
+    'elastic': Corruptions.apply_elastic,
+    'pixelate': Corruptions.apply_pixelate,
+    'jpeg': Corruptions.apply_jpeg_compression
 }
 
 if __name__ == "__main__":

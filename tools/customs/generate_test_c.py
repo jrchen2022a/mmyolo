@@ -20,9 +20,9 @@ def generate_c(ori_path, out_path):
                 sub_dir = os.path.join(dir,str(severity))
                 if not os.path.exists(sub_dir):
                     os.mkdir(sub_dir)
-                    corrupt_img = corruption_methods[ct](img, severity)
-                    dst_img_path = os.path.join(sub_dir, item)
-                    cv2.imwrite(dst_img_path, cv2.cvtColor(corrupt_img, cv2.COLOR_RGB2BGR))  # 保存处理后的图像
+                corrupt_img = corruption_methods[ct](img, severity)
+                dst_img_path = os.path.join(sub_dir, item)
+                cv2.imwrite(dst_img_path, cv2.cvtColor(corrupt_img, cv2.COLOR_RGB2BGR))  # 保存处理后的图像
 
 
 if __name__ == "__main__":
