@@ -254,11 +254,95 @@ def convert_yolo_to_coco(image_dir: str):
     print('You can use tools/analysis_tools/browse_coco_json.py to visualize!')
 
 
+def convert_yolo_to_coco(yolo_image_dir: str, yolo_label_dir: str, yolo_class_txt: str, output_folder: str):
+
+    # check local environment
+    check_existence(yolo_label_dir)
+    check_existence(yolo_image_dir)
+    check_existence(yolo_class_txt)
+
+
+    # prepare the output folders
+    if not osp.exists(output_folder):
+        os.makedirs(output_folder)
+        check_existence(output_folder)
+
+    # start the convert procedure
+    with open(yolo_class_txt) as f:
+        classes = f.read().strip().split()
+
+    indices = os.listdir(yolo_image_dir)
+    total = len(indices)
+
+    dataset = {'images': [], 'annotations': [], 'categories': []}
+
+    for i, cls in enumerate(classes, 0):
+        dataset['categories'].append({'id': i, 'name': cls})
+
+    obj_count = 0
+    skipped = 0
+    converted = 0
+    for idx, image in enumerate(mmengine.track_iter_progress(indices)):
+        img_info_dict, image_height, image_width = get_image_info(
+            yolo_image_dir, idx, image)
+
+        dataset['images'].append(img_info_dict)
+
+        img_name = osp.splitext(image)[0]
+        label_path = f'{osp.join(yolo_label_dir, img_name)}.txt'
+        if not osp.exists(label_path):
+            # if current image is not annotated or the annotation file failed
+            print(
+                f'WARNING: {label_path} does not exist. Please check the file.'
+            )
+            skipped += 1
+            continue
+
+        with open(label_path) as f:
+            labels = f.readlines()
+            for label in labels:
+                coco_info, obj_count = convert_bbox_info(
+                    label, idx, obj_count, image_height, image_width)
+                dataset['annotations'].append(coco_info)
+        converted += 1
+
+    # saving results to result json
+    out_file = osp.join(output_folder, 'test.json')
+    print(f'Saving converted results to {out_file} ...')
+    mmengine.dump(dataset, out_file)
+
+    # simple statistics
+    print(f'Process finished! Please check at {output_folder} .')
+    print(f'Number of images found: {total}, converted: {converted},',
+          f'and skipped: {skipped}. Total annotation count: {obj_count}.')
+    print('You can use tools/analysis_tools/browse_coco_json.py to visualize!')
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        'image_dir',
+        '--image-dir',
         type=str,
+        default=None,
         help='dataset directory with ./images and ./labels, classes.txt, etc.')
+    parser.add_argument(
+        '--images',
+        type=str,
+        default=None)
+    parser.add_argument(
+        '--labels',
+        type=str,
+        default=None)
+    parser.add_argument(
+        '--class-txt',
+        type=str,
+        default=None)
+    parser.add_argument(
+        '--output',
+        type=str,
+        default=None)
     arg = parser.parse_args()
-    convert_yolo_to_coco(arg.image_dir)
+    if not arg.image_dir is None:
+        convert_yolo_to_coco(arg.image_dir)
+    else:
+        convert_yolo_to_coco(arg.images, arg.labels, arg.class_txt, arg.output)
