@@ -243,7 +243,7 @@ class Corruptions:
 
     @staticmethod
     def apply_contrast(img, severity):
-        c = [1.5, 1.2, .9, .6, .3][severity - 1]
+        c = [.9, 1.2, 0.6, 1.5, .3][severity - 1]
 
         x = np.array(img) / 255.
         means = np.mean(x, axis=(0, 1), keepdims=True)
@@ -251,11 +251,11 @@ class Corruptions:
 
     @staticmethod
     def apply_elastic(img, severity=1):
-        c = [(244 * 2, 244 * 0.7, 244 * 0.1),  # 244 should have been 224, but ultimately nothing is incorrect
-             (244 * 2, 244 * 0.08, 244 * 0.2),
+        c = [(244 * 0.02, 244 * 0.01, 244 * 0.02),
              (244 * 0.05, 244 * 0.01, 244 * 0.02),
-             (244 * 0.07, 244 * 0.01, 244 * 0.02),
-             (244 * 0.12, 244 * 0.01, 244 * 0.02)][severity - 1]
+             (244 * 0.08, 244 * 0.01, 244 * 0.02),
+             (244 * 0.11, 244 * 0.01, 244 * 0.02),
+             (244 * 0.14, 244 * 0.01, 244 * 0.02)][severity - 1]
 
         img = np.array(img, dtype=np.float32) / 255.
         shape = img.shape

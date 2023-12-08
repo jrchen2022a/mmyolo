@@ -3,8 +3,7 @@ import cv2
 import os
 
 
-def generate_c(ori_path, out_path):
-    severitys = [1, 2, 3, 4, 5]  # 可根据需要调整强度范围
+def generate_c(ori_path, out_path, corruptions=corruption_methods.keys(), severities=(1, 2, 3, 4, 5)):
     # 加载图像
     for item in os.listdir(ori_path):
         if item.startswith('.') or not item.endswith('.jpg'):
@@ -12,11 +11,11 @@ def generate_c(ori_path, out_path):
         img_path = os.path.join(ori_path, item)
         img = cv2.imread(img_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # 将图像从 BGR 色彩空间转换为 RGB
-        for ct in corruption_methods:
+        for ct in corruptions:
             dir = os.path.join(out_path,ct)
             if not os.path.exists(dir):
                 os.mkdir(dir)
-            for severity in severitys:
+            for severity in severities:
                 sub_dir = os.path.join(dir,str(severity))
                 if not os.path.exists(sub_dir):
                     os.mkdir(sub_dir)

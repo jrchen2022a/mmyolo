@@ -45,12 +45,18 @@ class GeneralityTestLoop(TestLoop):
 
     def run(self) -> dict:
         """Launch test."""
-        # ret_metrics = super().run()
+        ori_metrics = super().run()
         logger: MMLogger = MMLogger.get_current_instance()
         corruption_dataloader_cfg = self.runner.cfg.get('test_dataloader').copy()
 
         sum_metrics = dict()
         for cor in self.corruptions:
+            # 记录初始值
+            log_metrics = {}
+            for (key, value) in ori_metrics.items():
+                log_metrics[key.replace('coco', cor)] = value
+            self.runner.visualizer.add_scalars(log_metrics)
+
             for ser in self.severities:
                 logger.info('Testing corruption {0} at severity {1}'.format(cor, ser))
                 corruption_dataloader_cfg.get('dataset').get('data_prefix')['img'] = ('corruptions/{0}/{1}/'
@@ -65,6 +71,9 @@ class GeneralityTestLoop(TestLoop):
                         sum_metrics[key] += metrics[key]
                     else:
                         sum_metrics[key] = metrics[key]
+                    log_metrics[key.replace('coco', cor)] = value
+                # 记录
+                self.runner.visualizer.add_scalars(log_metrics)
 
             for k in sum_metrics.keys():
                 sum_metrics[k] /= len(self.severities)

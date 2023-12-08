@@ -41,4 +41,4 @@ if __name__ == '__main__':
     dst_path = join(src_path, 'corruptions')
     # extract_imgs(src_path, dst_path)
     from generate_test_c import generate_c
-    generate_c(join(dst_path, 'originals'), dst_path)
+    generate_c(join(dst_path, 'originals'), dst_path, corruptions=['elastic','contrast'])
