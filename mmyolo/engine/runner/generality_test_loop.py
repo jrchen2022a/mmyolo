@@ -48,14 +48,15 @@ class GeneralityTestLoop(TestLoop):
         ori_metrics = super().run()
         logger: MMLogger = MMLogger.get_current_instance()
         corruption_dataloader_cfg = self.runner.cfg.get('test_dataloader').copy()
-
+        log_metrics = dict()
+        sum_cor_metrics = dict()
         sum_metrics = dict()
         for cor in self.corruptions:
             # 记录初始值
-            log_metrics = {}
             for (key, value) in ori_metrics.items():
                 log_metrics[key.replace('coco', cor)] = value
             self.runner.visualizer.add_scalars(log_metrics)
+            sum_cor_metrics.clear()
 
             for ser in self.severities:
                 logger.info('Testing corruption {0} at severity {1}'.format(cor, ser))
@@ -66,25 +67,31 @@ class GeneralityTestLoop(TestLoop):
                 for idx, data_batch in enumerate(corruption_dataloader):
                     self.run_iter(idx, data_batch)
                 metrics = self.evaluator.evaluate(len(corruption_dataloader.dataset))
+
                 for (key, value) in metrics.items():
-                    if key in sum_metrics:
-                        sum_metrics[key] += metrics[key]
+                    log_key = key.replace('coco', cor)
+                    if log_key in sum_cor_metrics:
+                        sum_cor_metrics[log_key] += metrics[key] / len(self.severities)
                     else:
-                        sum_metrics[key] = metrics[key]
-                    log_metrics[key.replace('coco', cor)] = value
+                        sum_cor_metrics[log_key] = metrics[key] / len(self.severities)
+                    log_metrics[log_key] = value
                 # 记录
                 self.runner.visualizer.add_scalars(log_metrics)
+                log_metrics.clear()
 
-            for k in sum_metrics.keys():
-                sum_metrics[k] /= len(self.severities)
+            for key in sum_cor_metrics.keys():
+                k = key.split('/')[1]
+                if k in sum_metrics:
+                    sum_metrics[k] += sum_cor_metrics[key] / len(self.corruptions)
+                else:
+                    sum_metrics[k] = sum_cor_metrics[key] / len(self.corruptions)
+
             logger.info('metrics in corruption {0} is: \n'.format(cor))
-            for (k,v) in sum_metrics.items():
+            for (k,v) in sum_cor_metrics.items():
                 logger.info('{0}\t:{1:.3f}'.format(k, v))
 
-        for k in sum_metrics.keys():
-            sum_metrics[k] /= len(self.corruptions)
         logger.info('metrics in total is: \n')
         for (k, v) in sum_metrics.items():
             logger.info('{0}\t:{1:.3f}'.format(k, v))
-        # return ret_metrics
-        return None
+
+        return sum_metrics
