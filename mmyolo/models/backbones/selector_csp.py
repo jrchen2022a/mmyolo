@@ -6,7 +6,8 @@ from mmcv.cnn import ConvModule
 from mmdet.utils import ConfigType, OptMultiConfig
 
 from mmyolo.registry import MODELS
-from ..layers import SPPFBottleneck, SelectorCSPLayer
+from ..layers import SPPFBottleneck
+from ..layers.selector_csp_layer import SelectorCSPLayer, SelectorCSPLayerV2
 from ..utils import make_divisible, make_round
 from .base_backbone import BaseBackbone
 
@@ -23,8 +24,13 @@ class YOLOv5SelectorCSPDarknet(BaseBackbone):
                [768, 1024, 3, True, True]]
     }
 
+    selector_settings = {
+        'SelectorCSPLayer': SelectorCSPLayer,
+        'SelectorCSPLayerV2': SelectorCSPLayerV2
+    }
     def __init__(self,
                  num_selectors: int = 3,
+                 selector_type: str = 'SelectorCSPLayer',
                  arch: str = 'P5',
                  plugins: Union[dict, List[dict]] = None,
                  deepen_factor: float = 1.0,
@@ -38,6 +44,7 @@ class YOLOv5SelectorCSPDarknet(BaseBackbone):
                  norm_eval: bool = False,
                  init_cfg: OptMultiConfig = None):
         self.num_selectors = num_selectors
+        self.selector = self.selector_settings[selector_type]
         super().__init__(
             self.arch_settings[arch],
             deepen_factor,
@@ -84,7 +91,7 @@ class YOLOv5SelectorCSPDarknet(BaseBackbone):
             norm_cfg=self.norm_cfg,
             act_cfg=self.act_cfg)
         stage.append(conv_layer)
-        csp_layer = SelectorCSPLayer(
+        csp_layer = self.selector(
             out_channels,
             out_channels,
             num_selectors=self.num_selectors,

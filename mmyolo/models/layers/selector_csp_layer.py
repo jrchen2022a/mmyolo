@@ -34,6 +34,9 @@ class AttentionSEblock(nn.Module):
 
 
 class SelectorCSPLayer(BaseModule):
+    """
+        改动short_conv为selector，效果一般
+    """
     def __init__(self,
                  in_channels: int,
                  out_channels: int,
@@ -105,6 +108,87 @@ class SelectorCSPLayer(BaseModule):
 
         x_main = self.main_conv(x)
         x_main = self.blocks(x_main)
+
+        x_final = torch.cat((x_main, x_short), dim=1)
+
+        if self.channel_attention:
+            x_final = self.attention(x_final)
+        return self.final_conv(x_final)
+
+
+class SelectorCSPLayerV2(BaseModule):
+    """
+        改动main_conv中的bottleneck为selector
+    """
+    def __init__(self,
+                 in_channels: int,
+                 out_channels: int,
+                 num_selectors: int = 3,
+                 expand_ratio: float = 0.5,
+                 num_blocks: int = 1,
+                 add_identity: bool = True,
+                 use_depthwise: bool = False,
+                 use_cspnext_block: bool = False,
+                 channel_attention: bool = False,
+                 conv_cfg: OptConfigType = None,
+                 norm_cfg: ConfigType = dict(
+                     type='BN', momentum=0.03, eps=0.001),
+                 act_cfg: ConfigType = dict(type='Swish'),
+                 init_cfg: OptMultiConfig = None) -> None:
+        super().__init__(init_cfg=init_cfg)
+        block = CSPNeXtBlock if use_cspnext_block else DarknetBottleneck
+        mid_channels = int(out_channels * expand_ratio)
+        self.channel_attention = channel_attention
+        self.main_conv = ConvModule(
+            in_channels,
+            mid_channels,
+            1,
+            conv_cfg=conv_cfg,
+            norm_cfg=norm_cfg,
+            act_cfg=act_cfg)
+        self.final_conv = ConvModule(
+            2 * mid_channels,
+            out_channels,
+            1,
+            conv_cfg=conv_cfg,
+            norm_cfg=norm_cfg,
+            act_cfg=act_cfg)
+        self.short_conv = ConvModule(
+            in_channels,
+            mid_channels,
+            1,
+            conv_cfg=conv_cfg,
+            norm_cfg=norm_cfg,
+            act_cfg=act_cfg)
+
+        if channel_attention:
+            self.attention = ChannelAttention(2 * mid_channels)
+
+        self.blocks_group = nn.ModuleList()
+        for idx in range(num_selectors):
+            self.blocks_group.append(
+                nn.Sequential(*[
+                    block(
+                        mid_channels,
+                        mid_channels,
+                        1.0,
+                        add_identity,
+                        use_depthwise,
+                        conv_cfg=conv_cfg,
+                        norm_cfg=norm_cfg,
+                        act_cfg=act_cfg) for _ in range(num_blocks)]))
+        self.switch = AttentionSEblock(in_channels, num_outs=num_selectors, reduction=4)
+
+    def forward(self, x: Tensor) -> Tensor:
+        x_short = self.short_conv(x)
+        x_main_mid = self.main_conv(x)
+        switch_res = torch.split(self.switch(x), 1, dim=1)
+        x_main = None
+        for (gate, single_blocks) in zip(switch_res, self.blocks_group):
+            if x_main is None:
+                x_main = single_blocks(x_main_mid) * gate.view(x.shape[0], 1, 1, 1)
+            else:
+                x_main += single_blocks(x_main_mid) * gate.view(x.shape[0], 1, 1, 1)
 
         x_final = torch.cat((x_main, x_short), dim=1)
 
