@@ -118,7 +118,7 @@ class SelectorCSPLayer(BaseModule):
 
 class SelectorCSPLayerV2(BaseModule):
     """
-        改动main_conv中的bottleneck为selector
+        改动main_conv中的bottleneck为selector，效果好一点
     """
     def __init__(self,
                  in_channels: int,
