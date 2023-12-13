@@ -1,4 +1,4 @@
-_base_ = ['../_base_/default_runtime.py', "../_base_/datasets_dianwang.py"]
+_base_ = ['../_base_/default_runtime.py', '../_base_/datasets_dianwang.py']
 
 # ========================Frequently modified parameters======================
 nGPU = 4
@@ -17,18 +17,15 @@ max_epochs = 200  # Maximum training epochs
 # -----model related-----
 # Basic size of multi-scale prior box
 anchors = [
-    [(12, 16), (19, 36), (40, 28)],  # P3/8
-    [(36, 75), (76, 55), (72, 146)],  # P4/16
-    [(142, 110), (192, 243), (459, 401)]  # P5/32
+    [(10, 13), (16, 30), (33, 23)],  # P3/8
+    [(30, 61), (62, 45), (59, 119)],  # P4/16
+    [(116, 90), (156, 198), (373, 326)]  # P5/32
 ]
-
-num_epoch_stage2 = 30  # The last 30 epochs switch evaluation interval
-val_interval_stage2 = 1  # Evaluation interval
 
 model_test_cfg = dict(
     # The config of multi-label for multi-class prediction.
     multi_label=True,
-    # The number of boxes before NMS.
+    # The number of boxes before NMS
     nms_pre=30000,
     score_thr=0.001,  # Threshold to filter out boxes.
     nms=dict(type='nms', iou_threshold=0.65),  # NMS type and threshold
@@ -58,32 +55,24 @@ batch_shapes_cfg = dict(
 # -----model related-----
 strides = [8, 16, 32]  # Strides of multi-scale prior box
 num_det_layers = 3  # The number of model output scales
-norm_cfg = dict(type='BN', momentum=0.03, eps=0.001)
-
-# Data augmentation
-max_translate_ratio = 0.2  # YOLOv5RandomAffine
-scaling_ratio_range = (0.1, 2.0)  # YOLOv5RandomAffine
-mixup_prob = 0.15  # YOLOv5MixUp
-randchoice_mosaic_prob = [0.8, 0.2]
-mixup_alpha = 8.0  # YOLOv5MixUp
-mixup_beta = 8.0  # YOLOv5MixUp
+norm_cfg = dict(type='BN', momentum=0.03, eps=0.001)  # Normalization config
 
 # -----train val related-----
-loss_cls_weight = 0.3
+affine_scale = 0.5  # YOLOv5RandomAffine scaling ratio
+loss_cls_weight = 0.5
 loss_bbox_weight = 0.05
-loss_obj_weight = 0.7
+loss_obj_weight = 1.0
 # BatchYOLOv7Assigner params
 simota_candidate_topk = 10
 simota_iou_weight = 3.0
 simota_cls_weight = 1.0
 prior_match_thr = 4.  # Priori box matching threshold
-obj_level_weights = [4., 1.,
-                     0.4]  # The obj loss weights of the three output layers
-
-lr_factor = 0.1  # Learning rate scaling factor
+obj_level_weights = [4., 1., 0.4]  # The obj loss weights of the three output layers
+lr_factor = 0.01  # Learning rate scaling factor
 weight_decay = 0.0005
-max_keep_ckpts = 3  # The maximum checkpoints to keep.
 
+# The maximum checkpoints to keep.
+max_keep_ckpts = 3
 # Single-scale training is recommended to
 # be turned on, which can speed up training.
 env_cfg = dict(cudnn_benchmark=True)
@@ -155,12 +144,14 @@ model = dict(
         simota_cls_weight=simota_cls_weight),
     test_cfg=model_test_cfg)
 
+
 pre_transform = [
     dict(type='LoadImageFromFile', file_client_args=_base_.file_client_args),
     dict(type='LoadAnnotations', with_bbox=True)
 ]
 
-mosiac4_pipeline = [
+train_pipeline = [
+    *pre_transform,
     dict(
         type='Mosaic',
         img_scale=img_scale,
@@ -170,44 +161,10 @@ mosiac4_pipeline = [
         type='YOLOv5RandomAffine',
         max_rotate_degree=0.0,
         max_shear_degree=0.0,
-        max_translate_ratio=max_translate_ratio,  # note
-        scaling_ratio_range=scaling_ratio_range,  # note
+        scaling_ratio_range=(1 - affine_scale, 1 + affine_scale),
         # img_scale is (width, height)
         border=(-img_scale[0] // 2, -img_scale[1] // 2),
         border_val=(114, 114, 114)),
-]
-
-mosiac9_pipeline = [
-    dict(
-        type='Mosaic9',
-        img_scale=img_scale,
-        pad_val=114.0,
-        pre_transform=pre_transform),
-    dict(
-        type='YOLOv5RandomAffine',
-        max_rotate_degree=0.0,
-        max_shear_degree=0.0,
-        max_translate_ratio=max_translate_ratio,  # note
-        scaling_ratio_range=scaling_ratio_range,  # note
-        # img_scale is (width, height)
-        border=(-img_scale[0] // 2, -img_scale[1] // 2),
-        border_val=(114, 114, 114)),
-]
-
-randchoice_mosaic_pipeline = dict(
-    type='RandomChoice',
-    transforms=[mosiac4_pipeline, mosiac9_pipeline],
-    prob=randchoice_mosaic_prob)
-
-train_pipeline = [
-    *pre_transform,
-    randchoice_mosaic_pipeline,
-    dict(
-        type='YOLOv5MixUp',
-        alpha=mixup_alpha,  # note
-        beta=mixup_beta,  # note
-        prob=mixup_prob,
-        pre_transform=[*pre_transform, randchoice_mosaic_pipeline]),
     dict(type='YOLOv5HSVRandomAug'),
     dict(type='mmdet.RandomFlip', prob=0.5),
     dict(
@@ -219,10 +176,10 @@ train_pipeline = [
 train_dataloader = dict(
     batch_size=train_batch_size_per_gpu,
     num_workers=train_num_workers,
+    collate_fn=dict(type='yolov5_collate'),
     persistent_workers=persistent_workers,
     pin_memory=True,
     sampler=dict(type='DefaultSampler', shuffle=True),
-    collate_fn=dict(type='yolov5_collate'),  # FASTER
     dataset=dict(
         type=dataset_type,
         metainfo=_base_.metainfo,
@@ -256,8 +213,8 @@ val_dataloader = dict(
     sampler=dict(type='DefaultSampler', shuffle=False),
     dataset=dict(
         type=dataset_type,
-        metainfo=_base_.metainfo,
         data_root=_base_.data_root,
+        metainfo=_base_.metainfo,
         test_mode=True,
         data_prefix=dict(img=_base_.val_data_prefix),
         ann_file=_base_.val_ann_file,
@@ -281,12 +238,11 @@ optim_wrapper = dict(
 default_hooks = dict(
     param_scheduler=dict(
         type='YOLOv5ParamSchedulerHook',
-        scheduler_type='cosine',
-        lr_factor=lr_factor,  # note
+        scheduler_type='linear',
+        lr_factor=lr_factor,
         max_epochs=max_epochs),
     checkpoint=dict(
         type='CheckpointHook',
-        save_param_scheduler=False,
         interval=_base_.save_epoch_intervals,
         save_best='auto',
         max_keep_ckpts=max_keep_ckpts))
@@ -303,7 +259,7 @@ custom_hooks = [
 
 val_evaluator = dict(
     type='mmdet.CocoMetric',
-    proposal_nums=(100, 1, 10),  # Can be accelerated
+    proposal_nums=(100, 1, 10),
     ann_file=_base_.data_root + _base_.val_ann_file,
     classwise=True,
     metric='bbox')
@@ -312,7 +268,6 @@ test_evaluator = val_evaluator
 train_cfg = dict(
     type='EpochBasedTrainLoop',
     max_epochs=max_epochs,
-    val_interval=_base_.save_epoch_intervals,
-    dynamic_intervals=[(max_epochs - num_epoch_stage2, val_interval_stage2)])
+    val_interval=_base_.save_epoch_intervals)
 val_cfg = dict(type='ValLoop')
 test_cfg = dict(type='TestLoop')

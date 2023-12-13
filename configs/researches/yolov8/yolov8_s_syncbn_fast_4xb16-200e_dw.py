@@ -13,8 +13,6 @@ persistent_workers = True
 # Base learning rate for optim_wrapper. Corresponding to 8xb16=128 bs
 base_lr = 0.01/8*nGPU/16*train_batch_size_per_gpu
 max_epochs = 200  # Maximum training epochs
-# Disable mosaic augmentation for final 10 epochs (stage 2)
-close_mosaic_epochs = 10
 
 model_test_cfg = dict(
     # The config of multi-label for multi-class prediction.
@@ -22,7 +20,7 @@ model_test_cfg = dict(
     # The number of boxes before NMS
     nms_pre=30000,
     score_thr=0.001,  # Threshold to filter out boxes.
-    nms=dict(type='nms', iou_threshold=0.7),  # NMS type and threshold
+    nms=dict(type='nms', iou_threshold=0.65),  # NMS type and threshold
     max_per_img=300)  # Max number of detections of each image
 
 # ========================Possible modified parameters========================
@@ -36,17 +34,15 @@ val_batch_size_per_gpu = 1
 val_num_workers = 2
 
 # Config of batch shapes. Only on val.
-# We tested YOLOv8-m will get 0.02 higher than not using it.
-batch_shapes_cfg = None
-# You can turn on `batch_shapes_cfg` by uncommenting the following lines.
-# batch_shapes_cfg = dict(
-#     type='BatchShapePolicy',
-#     batch_size=val_batch_size_per_gpu,
-#     img_size=img_scale[0],
-#     # The image scale of padding should be divided by pad_size_divisor
-#     size_divisor=32,
-#     # Additional paddings for pixel scale
-#     extra_pad_ratio=0.5)
+# It means not used if batch_shapes_cfg is None.
+batch_shapes_cfg = dict(
+    type='BatchShapePolicy',
+    batch_size=val_batch_size_per_gpu,
+    img_size=img_scale[0],
+    # The image scale of padding should be divided by pad_size_divisor
+    size_divisor=32,
+    # Additional paddings for pixel scale
+    extra_pad_ratio=0.5)
 
 # -----model related-----
 # The scaling factor that controls the depth of the network structure
@@ -63,22 +59,20 @@ norm_cfg = dict(type='BN', momentum=0.03, eps=0.001)  # Normalization config
 # -----train val related-----
 affine_scale = 0.5  # YOLOv5RandomAffine scaling ratio
 # YOLOv5RandomAffine aspect ratio of width and height thres to filter bboxes
-max_aspect_ratio = 100
 tal_topk = 10  # Number of bbox selected in each level
 tal_alpha = 0.5  # A Hyper-parameter related to alignment_metrics
 tal_beta = 6.0  # A Hyper-parameter related to alignment_metrics
 # TODO: Automatically scale loss_weight based on number of detection layers
 loss_cls_weight = 0.5
-loss_bbox_weight = 7.5
+loss_bbox_weight = 0.05
 # Since the dfloss is implemented differently in the official
 # and mmdet, we're going to divide loss_weight by 4.
 loss_dfl_weight = 1.5 / 4
 lr_factor = 0.01  # Learning rate scaling factor
 weight_decay = 0.0005
-# validation intervals in stage 2
-val_interval_stage2 = 1
+
 # The maximum checkpoints to keep.
-max_keep_ckpts = 2
+max_keep_ckpts = 3
 # Single-scale training is recommended to
 # be turned on, which can speed up training.
 env_cfg = dict(cudnn_benchmark=True)
@@ -150,36 +144,10 @@ model = dict(
             eps=1e-9)),
     test_cfg=model_test_cfg)
 
-albu_train_transforms = [
-    dict(type='Blur', p=0.01),
-    dict(type='MedianBlur', p=0.01),
-    dict(type='ToGray', p=0.01),
-    dict(type='CLAHE', p=0.01)
-]
 
 pre_transform = [
     dict(type='LoadImageFromFile', file_client_args=_base_.file_client_args),
     dict(type='LoadAnnotations', with_bbox=True)
-]
-
-last_transform = [
-    dict(
-        type='mmdet.Albu',
-        transforms=albu_train_transforms,
-        bbox_params=dict(
-            type='BboxParams',
-            format='pascal_voc',
-            label_fields=['gt_bboxes_labels', 'gt_ignore_flags']),
-        keymap={
-            'img': 'image',
-            'gt_bboxes': 'bboxes'
-        }),
-    dict(type='YOLOv5HSVRandomAug'),
-    dict(type='mmdet.RandomFlip', prob=0.5),
-    dict(
-        type='mmdet.PackDetInputs',
-        meta_keys=('img_id', 'img_path', 'ori_shape', 'img_shape', 'flip',
-                   'flip_direction'))
 ]
 
 train_pipeline = [
@@ -194,37 +162,24 @@ train_pipeline = [
         max_rotate_degree=0.0,
         max_shear_degree=0.0,
         scaling_ratio_range=(1 - affine_scale, 1 + affine_scale),
-        max_aspect_ratio=max_aspect_ratio,
         # img_scale is (width, height)
         border=(-img_scale[0] // 2, -img_scale[1] // 2),
         border_val=(114, 114, 114)),
-    *last_transform
-]
-
-train_pipeline_stage2 = [
-    *pre_transform,
-    dict(type='YOLOv5KeepRatioResize', scale=img_scale),
+    dict(type='YOLOv5HSVRandomAug'),
+    dict(type='mmdet.RandomFlip', prob=0.5),
     dict(
-        type='LetterResize',
-        scale=img_scale,
-        allow_scale_up=True,
-        pad_val=dict(img=114.0)),
-    dict(
-        type='YOLOv5RandomAffine',
-        max_rotate_degree=0.0,
-        max_shear_degree=0.0,
-        scaling_ratio_range=(1 - affine_scale, 1 + affine_scale),
-        max_aspect_ratio=max_aspect_ratio,
-        border_val=(114, 114, 114)), *last_transform
+        type='mmdet.PackDetInputs',
+        meta_keys=('img_id', 'img_path', 'ori_shape', 'img_shape', 'flip',
+                   'flip_direction'))
 ]
 
 train_dataloader = dict(
     batch_size=train_batch_size_per_gpu,
     num_workers=train_num_workers,
+    collate_fn=dict(type='yolov5_collate'),
     persistent_workers=persistent_workers,
     pin_memory=True,
     sampler=dict(type='DefaultSampler', shuffle=True),
-    collate_fn=dict(type='yolov5_collate'),
     dataset=dict(
         type=dataset_type,
         metainfo=_base_.metainfo,
@@ -258,8 +213,8 @@ val_dataloader = dict(
     sampler=dict(type='DefaultSampler', shuffle=False),
     dataset=dict(
         type=dataset_type,
-        metainfo=_base_.metainfo,
         data_root=_base_.data_root,
+        metainfo=_base_.metainfo,
         test_mode=True,
         data_prefix=dict(img=_base_.val_data_prefix),
         ann_file=_base_.val_ann_file,
@@ -271,7 +226,6 @@ test_dataloader = val_dataloader
 param_scheduler = None
 optim_wrapper = dict(
     type='OptimWrapper',
-    clip_grad=dict(max_norm=10.0),
     optimizer=dict(
         type='SGD',
         lr=base_lr,
@@ -300,27 +254,20 @@ custom_hooks = [
         momentum=0.0001,
         update_buffers=True,
         strict_load=False,
-        priority=49),
-    dict(
-        type='mmdet.PipelineSwitchHook',
-        switch_epoch=max_epochs - close_mosaic_epochs,
-        switch_pipeline=train_pipeline_stage2)
+        priority=49)
 ]
 
 val_evaluator = dict(
     type='mmdet.CocoMetric',
-    classwise=True,
     proposal_nums=(100, 1, 10),
     ann_file=_base_.data_root + _base_.val_ann_file,
+    classwise=True,
     metric='bbox')
 test_evaluator = val_evaluator
 
 train_cfg = dict(
     type='EpochBasedTrainLoop',
     max_epochs=max_epochs,
-    val_interval=_base_.save_epoch_intervals,
-    dynamic_intervals=[((max_epochs - close_mosaic_epochs),
-                        val_interval_stage2)])
-
+    val_interval=_base_.save_epoch_intervals)
 val_cfg = dict(type='ValLoop')
 test_cfg = dict(type='TestLoop')

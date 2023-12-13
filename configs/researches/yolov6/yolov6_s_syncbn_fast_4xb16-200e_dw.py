@@ -1,4 +1,4 @@
-_base_ = ['../_base_/default_runtime.py','../_base_/datasets_dianwang.py']
+_base_ = ['../_base_/default_runtime.py', '../_base_/datasets_dianwang.py']
 
 # ========================Frequently modified parameters======================
 nGPU = 4
@@ -13,9 +13,17 @@ persistent_workers = True
 # Base learning rate for optim_wrapper. Corresponding to 8xb16=128 bs
 base_lr = 0.01/8*nGPU/16*train_batch_size_per_gpu
 max_epochs = 200  # Maximum training epochs
-num_last_epochs = 15  # Last epoch number to switch training pipeline
 
-# ======================= Possible modified parameters =======================
+model_test_cfg = dict(
+    # The config of multi-label for multi-class prediction.
+    multi_label=True,
+    # The number of boxes before NMS
+    nms_pre=30000,
+    score_thr=0.001,  # Threshold to filter out boxes.
+    nms=dict(type='nms', iou_threshold=0.65),  # NMS type and threshold
+    max_per_img=300)  # Max number of detections of each image
+
+# ========================Possible modified parameters========================
 # -----data related-----
 img_scale = (640, 640)  # width, height
 # Dataset type, this will be used to define the dataset
@@ -31,7 +39,9 @@ batch_shapes_cfg = dict(
     type='BatchShapePolicy',
     batch_size=val_batch_size_per_gpu,
     img_size=img_scale[0],
+    # The image scale of padding should be divided by pad_size_divisor
     size_divisor=32,
+    # Additional paddings for pixel scale
     extra_pad_ratio=0.5)
 
 # -----model related-----
@@ -51,7 +61,7 @@ max_keep_ckpts = 3
 # be turned on, which can speed up training.
 env_cfg = dict(cudnn_benchmark=True)
 
-# ============================== Unmodified in most cases ===================
+# ===============================Unmodified in most cases====================
 model = dict(
     type='YOLODetector',
     data_preprocessor=dict(
@@ -106,15 +116,9 @@ model = dict(
             alpha=1,
             beta=6),
     ),
-    test_cfg=dict(
-        multi_label=True,
-        nms_pre=30000,
-        score_thr=0.001,
-        nms=dict(type='nms', iou_threshold=0.65),
-        max_per_img=300))
+    test_cfg=model_test_cfg)
 
-# The training pipeline of YOLOv6 is basically the same as YOLOv5.
-# The difference is that Mosaic and RandomAffine will be closed in the last 15 epochs. # noqa
+
 pre_transform = [
     dict(type='LoadImageFromFile', file_client_args=_base_.file_client_args),
     dict(type='LoadAnnotations', with_bbox=True)
@@ -130,35 +134,11 @@ train_pipeline = [
     dict(
         type='YOLOv5RandomAffine',
         max_rotate_degree=0.0,
-        max_translate_ratio=0.1,
+        max_shear_degree=0.0,
         scaling_ratio_range=(1 - affine_scale, 1 + affine_scale),
         # img_scale is (width, height)
         border=(-img_scale[0] // 2, -img_scale[1] // 2),
-        border_val=(114, 114, 114),
-        max_shear_degree=0.0),
-    dict(type='YOLOv5HSVRandomAug'),
-    dict(type='mmdet.RandomFlip', prob=0.5),
-    dict(
-        type='mmdet.PackDetInputs',
-        meta_keys=('img_id', 'img_path', 'ori_shape', 'img_shape', 'flip',
-                   'flip_direction'))
-]
-
-train_pipeline_stage2 = [
-    *pre_transform,
-    dict(type='YOLOv5KeepRatioResize', scale=img_scale),
-    dict(
-        type='LetterResize',
-        scale=img_scale,
-        allow_scale_up=True,
-        pad_val=dict(img=114)),
-    dict(
-        type='YOLOv5RandomAffine',
-        max_rotate_degree=0.0,
-        max_translate_ratio=0.1,
-        scaling_ratio_range=(1 - affine_scale, 1 + affine_scale),
-        max_shear_degree=0.0,
-    ),
+        border_val=(114, 114, 114)),
     dict(type='YOLOv5HSVRandomAug'),
     dict(type='mmdet.RandomFlip', prob=0.5),
     dict(
@@ -207,8 +187,8 @@ val_dataloader = dict(
     sampler=dict(type='DefaultSampler', shuffle=False),
     dataset=dict(
         type=dataset_type,
-        metainfo=_base_.metainfo,
         data_root=_base_.data_root,
+        metainfo=_base_.metainfo,
         test_mode=True,
         data_prefix=dict(img=_base_.val_data_prefix),
         ann_file=_base_.val_ann_file,
@@ -217,8 +197,7 @@ val_dataloader = dict(
 
 test_dataloader = val_dataloader
 
-# Optimizer and learning rate scheduler of YOLOv6 are basically the same as YOLOv5. # noqa
-# The difference is that the scheduler_type of YOLOv6 is cosine.
+param_scheduler = None
 optim_wrapper = dict(
     type='OptimWrapper',
     optimizer=dict(
@@ -233,14 +212,14 @@ optim_wrapper = dict(
 default_hooks = dict(
     param_scheduler=dict(
         type='YOLOv5ParamSchedulerHook',
-        scheduler_type='cosine',
+        scheduler_type='linear',
         lr_factor=lr_factor,
         max_epochs=max_epochs),
     checkpoint=dict(
         type='CheckpointHook',
         interval=_base_.save_epoch_intervals,
-        max_keep_ckpts=max_keep_ckpts,
-        save_best='auto'))
+        save_best='auto',
+        max_keep_ckpts=max_keep_ckpts))
 
 custom_hooks = [
     dict(
@@ -249,11 +228,7 @@ custom_hooks = [
         momentum=0.0001,
         update_buffers=True,
         strict_load=False,
-        priority=49),
-    dict(
-        type='mmdet.PipelineSwitchHook',
-        switch_epoch=max_epochs - num_last_epochs,
-        switch_pipeline=train_pipeline_stage2)
+        priority=49)
 ]
 
 val_evaluator = dict(
@@ -267,7 +242,6 @@ test_evaluator = val_evaluator
 train_cfg = dict(
     type='EpochBasedTrainLoop',
     max_epochs=max_epochs,
-    val_interval=_base_.save_epoch_intervals,
-    dynamic_intervals=[(max_epochs - num_last_epochs, 1)])
+    val_interval=_base_.save_epoch_intervals)
 val_cfg = dict(type='ValLoop')
 test_cfg = dict(type='TestLoop')
