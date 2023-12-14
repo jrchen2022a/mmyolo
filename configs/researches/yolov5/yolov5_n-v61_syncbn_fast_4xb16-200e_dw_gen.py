@@ -5,7 +5,7 @@ work_dir = '/home/jrchen/researches/mmyolo_older/test_dirs/dianwang/yolov5_n-v61
 visualizer = dict(
     vis_backends=[
         dict(type='LocalVisBackend'),
-        dict(type='WandbVisBackend', init_kwargs=dict(project='researches_generality_test', name='yolov5_n'))
+        dict(type='WandbVisBackend', init_kwargs=dict(project=_base_.wandb_gen_project_name, name='yolov5_n'))
     ])
 
 test_cfg = dict(

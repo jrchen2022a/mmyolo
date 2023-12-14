@@ -1,11 +1,11 @@
-_base_ = './yolov5_n-v61_syncbn_fast_4xb16-200e_dw_selectorv2.py'
+_base_ = './yolov6_n_syncbn_fast_4xb16-200e_dw.py'
 
-work_dir = '/home/jrchen/researches/mmyolo_older/test_dirs/dianwang/yolov5_n-v61_syncbn_fast_' + str(_base_.nGPU) + 'xb' + str(
-    _base_.train_batch_size_per_gpu) + '-' + str(_base_.max_epochs) + 'e_dw_selectorv2_gen/'
+work_dir = '/home/jrchen/researches/mmyolo_older/test_dirs/dianwang/yolov6_n_syncbn_fast_' + str(_base_.nGPU) + 'xb' + str(
+    _base_.train_batch_size_per_gpu) + '-' + str(_base_.max_epochs) + 'e_dw/'
 visualizer = dict(
     vis_backends=[
         dict(type='LocalVisBackend'),
-        dict(type='WandbVisBackend', init_kwargs=dict(project=_base_.wandb_gen_project_name, name='yolov5_n_selectorv2'))
+        dict(type='WandbVisBackend', init_kwargs=dict(project=_base_.wandb_gen_project_name, name='yolov6_n'))
     ])
 
 test_cfg = dict(

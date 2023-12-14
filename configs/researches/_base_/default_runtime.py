@@ -14,7 +14,9 @@ env_cfg = dict(
     dist_cfg=dict(backend='nccl'),
 )
 
-wandb_init_kwargs = dict(project='research-dw-models-unified')
+wandb_project_name = 'research-dw-models-unified'
+wandb_gen_project_name = 'researches_generality_test_unified'
+wandb_init_kwargs = dict(project=wandb_project_name)
 visualizer = dict(
     type='mmdet.DetLocalVisualizer',
     vis_backends=[
