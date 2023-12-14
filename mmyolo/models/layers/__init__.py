@@ -6,12 +6,13 @@ from .yolo_bricks import (BepC3StageBlock, CSPLayerWithTwoConv,
                           MaxPoolAndStrideConvBlock, PPYOLOEBasicBlock,
                           RepStageBlock, RepVGGBlock, SPPFBottleneck,
                           SPPFCSPBlock, TinyDownSampleBlock)
-from .selector_csp_layer import SelectorCSPLayer
+from .selector_csp_layer import (SelectorCSPLayer, SelectorCSPLayerV2, SelectorCSPLayerWithTwoConv)
 
 __all__ = [
     'SPPFBottleneck', 'RepVGGBlock', 'RepStageBlock', 'ExpMomentumEMA',
     'ELANBlock', 'MaxPoolAndStrideConvBlock', 'SPPFCSPBlock',
     'PPYOLOEBasicBlock', 'EffectiveSELayer', 'TinyDownSampleBlock',
     'EELANBlock', 'ImplicitA', 'ImplicitM', 'BepC3StageBlock',
-    'CSPLayerWithTwoConv', 'DarknetBottleneck', 'SelectorCSPLayer'
+    'CSPLayerWithTwoConv', 'DarknetBottleneck', 'SelectorCSPLayer',
+    'SelectorCSPLayerV2', 'SelectorCSPLayerWithTwoConv'
 ]

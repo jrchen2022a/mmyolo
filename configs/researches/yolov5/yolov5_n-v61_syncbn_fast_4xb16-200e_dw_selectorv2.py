@@ -6,10 +6,10 @@ work_dir = '/home/jrchen/researches/mmyolo_older/work_dirs/dianwang/yolov5_n-v61
 visualizer = dict(
     vis_backends=[
         dict(type='LocalVisBackend'),
-        dict(type='WandbVisBackend', init_kwargs=dict(_base_.wandb_init_kwargs, name='yolov5_n_selectorv2'))
+        dict(type='WandbVisBackend', init_kwargs=dict(project=_base_.wandb_project_name, name='yolov5_n_selectorv2'))
     ])
-#,project='temp'
-# _base_.wandb_init_kwargs
+# 'temp'
+# _base_.wandb_project_name
 model = dict(
     backbone=dict(
         type='YOLOv5SelectorCSPDarknet',

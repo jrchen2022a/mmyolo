@@ -8,6 +8,13 @@ visualizer = dict(
         dict(type='WandbVisBackend', init_kwargs=dict(project=_base_.wandb_gen_project_name, name='yolov5_n_selectorv2'))
     ])
 
+# work_dir = '/home/jrchen/researches/mmyolo_older/test_dirs/temp/'
+# visualizer = dict(
+#     vis_backends=[
+#         dict(type='LocalVisBackend'),
+#         dict(type='WandbVisBackend', init_kwargs=dict(project='temp', name='yolov5_n_selectorv2'))
+#     ])
+
 test_cfg = dict(
     type='GeneralityTestLoop',
     corruptions=['guassian_noise',
