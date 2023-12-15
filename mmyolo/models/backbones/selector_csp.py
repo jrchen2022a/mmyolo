@@ -8,7 +8,7 @@ from mmdet.utils import ConfigType, OptMultiConfig
 from mmyolo.registry import MODELS
 from . import YOLOv8CSPDarknet
 from ..layers import SPPFBottleneck
-from ..layers import SelectorCSPLayer, SelectorCSPLayerV2, SelectorCSPLayerWithTwoConv
+from ..layers import SelectorCSPLayerV2, SelectorCSPLayerWithTwoConv
 from ..utils import make_divisible, make_round
 from .base_backbone import BaseBackbone
 
@@ -26,7 +26,6 @@ class YOLOv5SelectorCSPDarknet(BaseBackbone):
     }
 
     selector_settings = {
-        'SelectorCSPLayer': SelectorCSPLayer,
         'SelectorCSPLayerV2': SelectorCSPLayerV2
     }
     def __init__(self,
