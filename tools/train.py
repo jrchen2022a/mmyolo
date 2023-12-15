@@ -116,4 +116,6 @@ def main():
 
 
 if __name__ == '__main__':
+    from torch.autograd import set_detect_anomaly
+    set_detect_anomaly(True)
     main()

@@ -1,10 +1,9 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import copy
-
 import torch
 import torch.nn as nn
 from mmcv.cnn import ConvModule
 from mmengine.model import BaseModule
+from mmyolo.models.layers.yolo_bricks import DarknetBottleneck as V8DarknetBottleneck
 from torch import Tensor
 
 from mmdet.utils import ConfigType, OptConfigType, OptMultiConfig
@@ -152,9 +151,21 @@ class SelectorCSPLayerV2(CSPLayer):
             norm_cfg=norm_cfg,
             act_cfg=act_cfg,
             init_cfg=init_cfg)
-        self.selectors_group = nn.ModuleList(
-            copy.deepcopy(self.blocks) for _ in range(num_selectors))
+        block = CSPNeXtBlock if use_cspnext_block else DarknetBottleneck
+        mid_channels = int(out_channels * expand_ratio)
         del self.blocks
+        self.selectors_group = nn.ModuleList(
+            nn.Sequential(*[
+                block(
+                    mid_channels,
+                    mid_channels,
+                    1.0,
+                    add_identity,
+                    use_depthwise,
+                    conv_cfg=conv_cfg,
+                    norm_cfg=norm_cfg,
+                    act_cfg=act_cfg) for _ in range(num_blocks)
+            ]) for _ in range(num_selectors))
         self.switch = AttentionSEblock(in_channels, num_outs=num_selectors, reduction=4)
 
     def forward(self, x: Tensor) -> Tensor:
@@ -204,23 +215,43 @@ class SelectorCSPLayerWithTwoConv(CSPLayerWithTwoConv):
             norm_cfg=norm_cfg,
             act_cfg=act_cfg,
             init_cfg=init_cfg)
-        self.switch = AttentionSEblock(in_channels, num_outs=num_selectors, reduction=4)
+        self.num_blocks = num_blocks
+        del self.blocks
         self.selectors_group = nn.ModuleList(
-            self.blocks for _ in range(num_selectors))
+            nn.ModuleList(
+                V8DarknetBottleneck(
+                    self.mid_channels,
+                    self.mid_channels,
+                    expansion=1,
+                    kernel_size=(3, 3),
+                    padding=(1, 1),
+                    add_identity=add_identity,
+                    use_depthwise=False,
+                    conv_cfg=conv_cfg,
+                    norm_cfg=norm_cfg,
+                    act_cfg=act_cfg) for _ in range(num_blocks)) for _ in range(num_selectors))
+        self.switch = AttentionSEblock(in_channels, num_outs=num_selectors, reduction=4)
 
     def forward(self, x: Tensor) -> Tensor:
         """Forward process."""
-        x_switch = self.switch(x)
-
         x_main = self.main_conv(x)
-
-        # for (gate, single_blocks) in zip(x_switch, self.blocks_group):
-        #     if x_main is None:
-        #         x_main = single_blocks(x_main_mid) * gate.view(x.shape[0], 1, 1, 1)
-        #     else:
-        #         x_main += single_blocks(x_main_mid) * gate.view(x.shape[0], 1, 1, 1)
-        #
-        # x_final = torch.cat((x_main, x_short), dim=1)
+        x_switch = self.switch(x)
         x_main = list(x_main.split((self.mid_channels, self.mid_channels), 1))
-        x_main.extend(blocks(x_main[-1]) for blocks in self.blocks)
+        if self.training:
+            switch_res = torch.split(x_switch, 1, dim=1)
+            x_extend = list()
+            for idx, (gate, single_blocks) in enumerate(zip(switch_res, self.selectors_group)):
+                sx_in = x_main[1]
+                for (i, blocks) in enumerate(single_blocks):
+                    sx_int = blocks(sx_in) * gate.view(x.shape[0], 1, 1, 1)
+                    if len(x_extend) is i:
+                        x_extend.append(sx_int)
+                    else:
+                        x_extend[i] = x_extend[i] + sx_int
+                    sx_in = sx_int
+            x_main.extend(x_extend)
+        else:
+            selected_blocks = self.selectors_group[x_switch.squeeze().nonzero().squeeze()]
+            x_main.extend(blocks(x_main[-1]) for blocks in selected_blocks)
+
         return self.final_conv(torch.cat(x_main, 1))
