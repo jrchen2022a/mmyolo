@@ -28,7 +28,7 @@ class AttentionSEblock(nn.Module):
         x = self.fc1(x)
         x = self.relu(x)
         x = self.fc2(x)
-        x = F.softmax(x)
+        x = F.softmax(x, dim=1)
         return x
 
 

@@ -144,6 +144,12 @@ model = dict(
             eps=1e-9)),
     test_cfg=model_test_cfg)
 
+albu_train_transforms = [
+    dict(type='Blur', p=0.01),
+    dict(type='MedianBlur', p=0.01),
+    dict(type='ToGray', p=0.01),
+    dict(type='CLAHE', p=0.01)
+]
 
 pre_transform = [
     dict(type='LoadImageFromFile', file_client_args=_base_.file_client_args),
@@ -165,6 +171,17 @@ train_pipeline = [
         # img_scale is (width, height)
         border=(-img_scale[0] // 2, -img_scale[1] // 2),
         border_val=(114, 114, 114)),
+    dict(
+        type='mmdet.Albu',
+        transforms=albu_train_transforms,
+        bbox_params=dict(
+            type='BboxParams',
+            format='pascal_voc',
+            label_fields=['gt_bboxes_labels', 'gt_ignore_flags']),
+        keymap={
+            'img': 'image',
+            'gt_bboxes': 'bboxes'
+        }),
     dict(type='YOLOv5HSVRandomAug'),
     dict(type='mmdet.RandomFlip', prob=0.5),
     dict(
