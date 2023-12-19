@@ -10,9 +10,11 @@ train_num_workers = 4*nGPU
 persistent_workers = True
 
 # -----train val related-----
-# Base learning rate for optim_wrapper. Corresponding to 8xb16=128 bs
-base_lr = 0.01/8*nGPU/16*train_batch_size_per_gpu
+# Base learning rate for optim_wrapper. Corresponding to 8xb16=64 bs
+base_lr = 0.01
 max_epochs = 200  # Maximum training epochs
+# Disable mosaic augmentation for final 10 epochs (stage 2)
+close_mosaic_epochs = 10
 
 model_test_cfg = dict(
     # The config of multi-label for multi-class prediction.
@@ -59,18 +61,21 @@ norm_cfg = dict(type='BN', momentum=0.03, eps=0.001)  # Normalization config
 # -----train val related-----
 affine_scale = 0.5  # YOLOv5RandomAffine scaling ratio
 # YOLOv5RandomAffine aspect ratio of width and height thres to filter bboxes
+max_aspect_ratio = 100
 tal_topk = 10  # Number of bbox selected in each level
 tal_alpha = 0.5  # A Hyper-parameter related to alignment_metrics
 tal_beta = 6.0  # A Hyper-parameter related to alignment_metrics
 # TODO: Automatically scale loss_weight based on number of detection layers
 loss_cls_weight = 0.5
-loss_bbox_weight = 0.05
+loss_bbox_weight = 7.5
 # Since the dfloss is implemented differently in the official
 # and mmdet, we're going to divide loss_weight by 4.
 loss_dfl_weight = 1.5 / 4
 lr_factor = 0.01  # Learning rate scaling factor
 weight_decay = 0.0005
 
+# validation intervals in stage 2
+val_interval_stage2 = 1
 # The maximum checkpoints to keep.
 max_keep_ckpts = 3
 # Single-scale training is recommended to
@@ -156,21 +161,7 @@ pre_transform = [
     dict(type='LoadAnnotations', with_bbox=True)
 ]
 
-train_pipeline = [
-    *pre_transform,
-    dict(
-        type='Mosaic',
-        img_scale=img_scale,
-        pad_val=114.0,
-        pre_transform=pre_transform),
-    dict(
-        type='YOLOv5RandomAffine',
-        max_rotate_degree=0.0,
-        max_shear_degree=0.0,
-        scaling_ratio_range=(1 - affine_scale, 1 + affine_scale),
-        # img_scale is (width, height)
-        border=(-img_scale[0] // 2, -img_scale[1] // 2),
-        border_val=(114, 114, 114)),
+last_transform = [
     dict(
         type='mmdet.Albu',
         transforms=albu_train_transforms,
@@ -188,6 +179,42 @@ train_pipeline = [
         type='mmdet.PackDetInputs',
         meta_keys=('img_id', 'img_path', 'ori_shape', 'img_shape', 'flip',
                    'flip_direction'))
+]
+
+train_pipeline = [
+    *pre_transform,
+    dict(
+        type='Mosaic',
+        img_scale=img_scale,
+        pad_val=114.0,
+        pre_transform=pre_transform),
+    dict(
+        type='YOLOv5RandomAffine',
+        max_rotate_degree=0.0,
+        max_shear_degree=0.0,
+        scaling_ratio_range=(1 - affine_scale, 1 + affine_scale),
+        max_aspect_ratio=max_aspect_ratio,
+        # img_scale is (width, height)
+        border=(-img_scale[0] // 2, -img_scale[1] // 2),
+        border_val=(114, 114, 114)),
+    *last_transform
+]
+
+train_pipeline_stage2 = [
+    *pre_transform,
+    dict(type='YOLOv5KeepRatioResize', scale=img_scale),
+    dict(
+        type='LetterResize',
+        scale=img_scale,
+        allow_scale_up=True,
+        pad_val=dict(img=114.0)),
+    dict(
+        type='YOLOv5RandomAffine',
+        max_rotate_degree=0.0,
+        max_shear_degree=0.0,
+        scaling_ratio_range=(1 - affine_scale, 1 + affine_scale),
+        max_aspect_ratio=max_aspect_ratio,
+        border_val=(114, 114, 114)), *last_transform
 ]
 
 train_dataloader = dict(
@@ -243,6 +270,7 @@ test_dataloader = val_dataloader
 param_scheduler = None
 optim_wrapper = dict(
     type='OptimWrapper',
+    clip_grad=dict(max_norm=10.0),
     optimizer=dict(
         type='SGD',
         lr=base_lr,
@@ -271,7 +299,11 @@ custom_hooks = [
         momentum=0.0001,
         update_buffers=True,
         strict_load=False,
-        priority=49)
+        priority=49),
+    dict(
+        type='mmdet.PipelineSwitchHook',
+        switch_epoch=max_epochs - close_mosaic_epochs,
+        switch_pipeline=train_pipeline_stage2)
 ]
 
 val_evaluator = dict(
@@ -285,6 +317,9 @@ test_evaluator = val_evaluator
 train_cfg = dict(
     type='EpochBasedTrainLoop',
     max_epochs=max_epochs,
-    val_interval=_base_.save_epoch_intervals)
+    val_interval=_base_.save_epoch_intervals,
+    dynamic_intervals=[((max_epochs - close_mosaic_epochs),
+                        val_interval_stage2)])
+
 val_cfg = dict(type='ValLoop')
 test_cfg = dict(type='TestLoop')

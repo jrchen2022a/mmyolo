@@ -10,9 +10,10 @@ train_num_workers = 4*nGPU
 persistent_workers = True
 
 # -----train val related-----
-# Base learning rate for optim_wrapper. Corresponding to 8xb16=128 bs
-base_lr = 0.01/8*nGPU/16*train_batch_size_per_gpu
+# Base learning rate for optim_wrapper
+base_lr = 0.01
 max_epochs = 200  # Maximum training epochs
+num_last_epochs = 15  # Last epoch number to switch training pipeline
 
 model_test_cfg = dict(
     # The config of multi-label for multi-class prediction.
@@ -134,11 +135,35 @@ train_pipeline = [
     dict(
         type='YOLOv5RandomAffine',
         max_rotate_degree=0.0,
-        max_shear_degree=0.0,
+        max_translate_ratio=0.1,
         scaling_ratio_range=(1 - affine_scale, 1 + affine_scale),
         # img_scale is (width, height)
         border=(-img_scale[0] // 2, -img_scale[1] // 2),
-        border_val=(114, 114, 114)),
+        border_val=(114, 114, 114),
+        max_shear_degree=0.0),
+    dict(type='YOLOv5HSVRandomAug'),
+    dict(type='mmdet.RandomFlip', prob=0.5),
+    dict(
+        type='mmdet.PackDetInputs',
+        meta_keys=('img_id', 'img_path', 'ori_shape', 'img_shape', 'flip',
+                   'flip_direction'))
+]
+
+train_pipeline_stage2 = [
+    *pre_transform,
+    dict(type='YOLOv5KeepRatioResize', scale=img_scale),
+    dict(
+        type='LetterResize',
+        scale=img_scale,
+        allow_scale_up=True,
+        pad_val=dict(img=114)),
+    dict(
+        type='YOLOv5RandomAffine',
+        max_rotate_degree=0.0,
+        max_translate_ratio=0.1,
+        scaling_ratio_range=(1 - affine_scale, 1 + affine_scale),
+        max_shear_degree=0.0,
+    ),
     dict(type='YOLOv5HSVRandomAug'),
     dict(type='mmdet.RandomFlip', prob=0.5),
     dict(
@@ -212,7 +237,7 @@ optim_wrapper = dict(
 default_hooks = dict(
     param_scheduler=dict(
         type='YOLOv5ParamSchedulerHook',
-        scheduler_type='linear',
+        scheduler_type='cosine',
         lr_factor=lr_factor,
         max_epochs=max_epochs),
     checkpoint=dict(
@@ -228,7 +253,11 @@ custom_hooks = [
         momentum=0.0001,
         update_buffers=True,
         strict_load=False,
-        priority=49)
+        priority=49),
+    dict(
+        type='mmdet.PipelineSwitchHook',
+        switch_epoch=max_epochs - num_last_epochs,
+        switch_pipeline=train_pipeline_stage2)
 ]
 
 val_evaluator = dict(
@@ -242,6 +271,7 @@ test_evaluator = val_evaluator
 train_cfg = dict(
     type='EpochBasedTrainLoop',
     max_epochs=max_epochs,
-    val_interval=_base_.save_epoch_intervals)
+    val_interval=_base_.save_epoch_intervals,
+    dynamic_intervals=[(max_epochs - num_last_epochs, 1)])
 val_cfg = dict(type='ValLoop')
 test_cfg = dict(type='TestLoop')
