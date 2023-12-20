@@ -40,5 +40,7 @@ if __name__ == '__main__':
     src_path = r'/home/jrchen/datasets/researches'
     dst_path = join(src_path, 'corruptions')
     # extract_imgs(src_path, dst_path)
-    from generate_test_c import generate_c
-    generate_c(join(dst_path, 'originals'), dst_path, corruptions=['elastic','contrast'])
+    from generate_test_c import generate_c, generate_c_standard
+    # generate_c(join(dst_path, 'originals'), dst_path, corruptions=['elastic','contrast'])
+    generate_c_standard(join(dst_path, 'originals'), join(src_path, 'corruptions1'))
+

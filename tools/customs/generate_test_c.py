@@ -1,6 +1,37 @@
 from corruptions import corruption_methods
 import cv2
 import os
+from PIL import Image
+import numpy as np
+from imagecorruptions import corrupt
+
+
+corruptions_group = ['gaussian_noise', 'shot_noise', 'impulse_noise', 'defocus_blur',
+                     'glass_blur', 'motion_blur', 'zoom_blur', 'snow', 'frost', 'fog',
+                     'brightness', 'contrast', 'elastic_transform', 'pixelate', 'jpeg_compression',
+                     'speckle_noise', 'gaussian_blur', 'spatter', 'saturate']
+
+
+def generate_c_standard(ori_path, out_path):
+    if not os.path.exists(out_path):
+        os.mkdir(out_path)
+    for i in range(len(corruptions_group)):
+        dir = os.path.join(out_path, corruptions_group[i])
+        if not os.path.exists(dir):
+            os.mkdir(dir)
+        for severity in range(5):
+            sub_dir = os.path.join(dir, str(severity + 1))
+            if not os.path.exists(sub_dir):
+                os.mkdir(sub_dir)
+            # 加载图像
+            for item in os.listdir(ori_path):
+                dst_img_path = os.path.join(sub_dir, item)
+                if item.startswith('.') or not item.endswith('.jpg') or os.path.exists(dst_img_path):
+                    continue
+                img_path = os.path.join(ori_path, item)
+                img = np.asarray(Image.open(img_path))
+                corrupted_img = corrupt(img, corruption_number=i, severity=severity + 1)
+                cv2.imwrite(dst_img_path, corrupted_img)  # 保存处理后的图像
 
 
 def generate_c(ori_path, out_path, corruptions=corruption_methods.keys(), severities=(1, 2, 3, 4, 5)):
