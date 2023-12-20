@@ -20,6 +20,7 @@ def generate_c_standard(ori_path, out_path):
         if not os.path.exists(dir):
             os.mkdir(dir)
         for severity in range(5):
+            print("processing {0} at severity {1}".format(corruptions_group[i], severity + 1))
             sub_dir = os.path.join(dir, str(severity + 1))
             if not os.path.exists(sub_dir):
                 os.mkdir(sub_dir)
