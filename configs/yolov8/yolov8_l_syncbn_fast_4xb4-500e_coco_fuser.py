@@ -1,7 +1,17 @@
-# 跑得相当吃力
-_base_ = './yolov8_l_syncbn_fast_4xb4-500e_coco.py'
+# 12G
+_base_ = './yolov8_l_syncbn_fast_8xb16-500e_coco.py'
+train_batch_size_per_gpu = 4
+train_num_workers = 2
 
-work_dir = '/home/jrchen/researches/mmyolo_older/work_dirs/coco/yolov8_l_syncbn_fast_1xb8-500e_coco_fuser/'
+train_dataloader = dict(
+    batch_size=train_batch_size_per_gpu,
+    num_workers=train_num_workers)
+
+optim_wrapper = dict(
+    optimizer=dict(
+        batch_size_per_gpu=train_batch_size_per_gpu))
+
+work_dir = '/home/jrchen/researches/mmyolo_older/work_dirs/coco/yolov8_l_syncbn_fast_4xb4-500e_coco_fuser/'
 visualizer = dict(
     vis_backends=[
         dict(type='LocalVisBackend'),

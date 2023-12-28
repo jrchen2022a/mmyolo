@@ -1,5 +1,5 @@
-# 跑得相当吃力
-_base_ = './yolov8_l_syncbn_fast_4xb16-500e_coco.py'
+# 24G 跑不动
+_base_ = './yolov8_l_syncbn_fast_8xb16-500e_coco.py'
 
 work_dir = '/home/jrchen/researches/mmyolo_older/work_dirs/coco/yolov8_l_syncbn_fast_4xb16-500e_coco_fuser/'
 visualizer = dict(
