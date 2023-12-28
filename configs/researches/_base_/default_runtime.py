@@ -16,6 +16,7 @@ env_cfg = dict(
 
 wandb_project_name = 'research-dw-models-unified'
 wandb_gen_project_name = 'researches_generality_test_unified'
+wandb_standard_gen_project_name = 'researches_generality_test_standard'
 wandb_init_kwargs = dict(project=wandb_project_name)
 visualizer = dict(
     type='mmdet.DetLocalVisualizer',

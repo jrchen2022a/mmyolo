@@ -18,30 +18,38 @@ class GeneralityTestLoop(TestLoop):
                  evaluator: Union[Evaluator, Dict, List],
                  corruptions=None,
                  severities=None,
+                 gen_type='custom',  # 'custom' 为自定义方法生成测试集 'standard' 为调用imagecorruptions库生成测试集
                  fp16: bool = False):
         super().__init__(runner, dataloader, evaluator, fp16)
         if corruptions is None:
-            self.corruptions = ['guassian_noise',
-                                'shot_noise',
-                                'impulse_noise',
-                                'defocus_blur',
-                                'frosted_glass_blur',
-                                'motion_blur',
-                                'zoom_blur',
-                                'snow',
-                                'rain',
-                                'fog',
-                                'brightness',
-                                'contrast',
-                                'elastic',
-                                'pixelate',
-                                'jpeg']
+            if gen_type is 'custom':
+                self.corruptions = ['guassian_noise',
+                                    'shot_noise',
+                                    'impulse_noise',
+                                    'defocus_blur',
+                                    'frosted_glass_blur',
+                                    'motion_blur',
+                                    'zoom_blur',
+                                    'snow',
+                                    'rain',
+                                    'fog',
+                                    'brightness',
+                                    'contrast',
+                                    'elastic',
+                                    'pixelate',
+                                    'jpeg']
+            else:
+                self.corruptions = ['gaussian_noise', 'shot_noise', 'impulse_noise', 'defocus_blur',
+                     'glass_blur', 'motion_blur', 'zoom_blur', 'snow', 'frost', 'fog',
+                     'brightness', 'contrast', 'elastic_transform', 'pixelate', 'jpeg_compression',
+                     'speckle_noise', 'gaussian_blur', 'spatter', 'saturate']
         else:
             self.corruptions = corruptions
         if severities is None:
             self.severities = [1, 2, 3, 4, 5]
         else:
             self.severities = severities
+        self.gen_prefix = 'corruptions' if gen_type is 'custom' else 'corruptions1'
 
     def run(self) -> dict:
         """Launch test."""
@@ -60,8 +68,8 @@ class GeneralityTestLoop(TestLoop):
 
             for ser in self.severities:
                 logger.info('Testing corruption {0} at severity {1}'.format(cor, ser))
-                corruption_dataloader_cfg.get('dataset').get('data_prefix')['img'] = ('corruptions/{0}/{1}/'
-                                                                                      .format(cor, ser))
+                corruption_dataloader_cfg.get('dataset').get('data_prefix')['img'] = ('{0}/{1}/{2}'
+                                                                                      .format(self.gen_prefix, cor, ser))
                 corruption_dataloader = self.runner.build_dataloader(corruption_dataloader_cfg)
                 self.runner.call_hook('before_test_epoch')
                 for idx, data_batch in enumerate(corruption_dataloader):
@@ -88,10 +96,16 @@ class GeneralityTestLoop(TestLoop):
 
             logger.info('metrics in corruption {0} is: \n'.format(cor))
             for (k,v) in sum_cor_metrics.items():
-                logger.info('{0}\t:{1:.3f}'.format(k, v))
+                logger.info('{0}\t\t:{1:.3f}'.format(k, v))
+            log_metrics['metrics_mAP/{0}'.format(cor)] = sum_cor_metrics['{0}/bbox_mAP'.format(cor)]
+            self.runner.visualizer.add_scalars(log_metrics)
+            log_metrics.clear()
 
         logger.info('metrics in total is: \n')
         for (k, v) in sum_metrics.items():
             logger.info('{0}\t:{1:.3f}'.format(k, v))
+        log_metrics['metrics_mAP/total'] = sum_cor_metrics['bbox_mAP']
+        self.runner.visualizer.add_scalars(log_metrics)
+        log_metrics.clear()
 
         return sum_metrics
