@@ -1,7 +1,7 @@
-# 至少得租个16G的
-_base_ = './yolov8_s_syncbn_fast_4xb16-500e_coco.py'
+# batch16的至少得租个16G的
+_base_ = './yolov8_s_syncbn_fast_4xb8-500e_coco.py'
 
-work_dir = './work_dirs/coco/yolov8_s_syncbn_fast_4xb16-500e_coco_fuser/'
+work_dir = './work_dirs/coco/yolov8_s_syncbn_fast_4xb8-500e_coco_fuser/'
 visualizer = dict(
     vis_backends=[
         dict(type='LocalVisBackend'),

@@ -1,6 +1,6 @@
 _base_ = './yolov8_l_syncbn_fast_8xb16-500e_coco.py'
-train_batch_size_per_gpu = 8
-train_num_workers = 4
+train_batch_size_per_gpu = 4
+train_num_workers = 2
 
 
 train_dataloader = dict(
