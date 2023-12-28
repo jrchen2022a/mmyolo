@@ -1,4 +1,4 @@
-_base_ = './yolov8_m_syncbn_fast_8xb16-500e_coco.py'
+_base_ = './yolov8_l_syncbn_fast_8xb16-500e_coco.py'
 train_batch_size_per_gpu = 8
 train_num_workers = 4
 

@@ -2,7 +2,7 @@ _base_ = '../_base_/default_runtime.py'
 
 # ========================Frequently modified parameters======================
 # -----data related-----
-data_root = '/home/jrchen/datasets/coco/'  # Root path of data
+data_root = '../coco/'  # Root path of data
 # Path of train annotation file
 train_ann_file = 'annotations/instances_train2017.json'
 train_data_prefix = 'train2017/'  # Prefix of train image path

@@ -1,7 +1,7 @@
 # 跑不动，真的跑不动，72天
-_base_ = './yolov8_x_syncbn_fast_1xb8-500e_coco.py'
+_base_ = './yolov8_x_syncbn_fast_4xb8-500e_coco.py'
 
-work_dir = '/home/jrchen/researches/mmyolo_older/work_dirs/coco/yolov8_x_syncbn_fast_1xb8-500e_coco_fuser/'
+work_dir = '/home/jrchen/researches/mmyolo_older/work_dirs/coco/yolov8_x_syncbn_fast_4xb8-500e_coco_fuser/'
 visualizer = dict(
     vis_backends=[
         dict(type='LocalVisBackend'),
