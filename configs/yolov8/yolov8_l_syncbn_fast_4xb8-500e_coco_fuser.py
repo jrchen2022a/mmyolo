@@ -1,4 +1,5 @@
-# 占用20G
+# 占用20G / 3090 20G 1:39day 4:13day / 4090 20G 1:23day 4:7day
+#       / A5000 20G 1:40day 4:12day / A40 20G 1:36day / V100 20G 1:49day 4:17day
 _base_ = './yolov8_l_syncbn_fast_8xb16-500e_coco.py'
 train_batch_size_per_gpu = 8
 train_num_workers = 4

@@ -1,4 +1,4 @@
-# 24G跑不动
+# A100 40G  1:43day / A40 1:49day
 _base_ = './yolov8_x_syncbn_fast_8xb16-500e_coco.py'
 
 work_dir = '/home/jrchen/researches/mmyolo_older/work_dirs/coco/yolov8_x_syncbn_fast_4xb16-500e_coco_fuser/'
