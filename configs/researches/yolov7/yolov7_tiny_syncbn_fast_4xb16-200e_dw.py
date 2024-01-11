@@ -95,7 +95,7 @@ train_pipeline = [
 train_dataloader = dict(dataset=dict(pipeline=train_pipeline))
 default_hooks = dict(param_scheduler=dict(lr_factor=lr_factor))
 
-work_dir = './work_dirs/dianwang/yolov7_tiny_syncbn_fast_'+str(_base_.nGPU)+'xb'+str(_base_.train_batch_size_per_gpu)+'-'+str(_base_.max_epochs)+'e_dw/'
+work_dir = _base_.work_dir_root+'/work_dirs/dianwang/yolov7_tiny_syncbn_fast_'+str(_base_.nGPU)+'xb'+str(_base_.train_batch_size_per_gpu)+'-'+str(_base_.max_epochs)+'e_dw/'
 visualizer = dict(
     type='mmdet.DetLocalVisualizer',
     vis_backends=[

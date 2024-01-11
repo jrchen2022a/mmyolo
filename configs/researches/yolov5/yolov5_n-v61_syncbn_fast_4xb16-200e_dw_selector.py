@@ -1,8 +1,8 @@
 _base_ = './yolov5_n-v61_syncbn_fast_4xb16-200e_dw.py'
 
-work_dir = '/home/jrchen/researches/mmyolo_older/work_dirs/dianwang/yolov5_n-v61_syncbn_fast_' + str(_base_.nGPU) + 'xb' + str(
+work_dir = _base_.work_dir_root+'/work_dirs/dianwang/yolov5_n-v61_syncbn_fast_' + str(_base_.nGPU) + 'xb' + str(
     _base_.train_batch_size_per_gpu) + '-' + str(_base_.max_epochs) + 'e_dw_selector/'
-# work_dir = '/home/jrchen/researches/mmyolo_older/work_dirs/temp/'
+# work_dir = _base_.work_dir_root+'/work_dirs/temp/'
 visualizer = dict(
     vis_backends=[
         dict(type='LocalVisBackend'),

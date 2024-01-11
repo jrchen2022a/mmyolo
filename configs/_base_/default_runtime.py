@@ -1,3 +1,6 @@
+work_dir_root = '.'
+wandb_offline = False
+
 default_scope = 'mmyolo'
 
 default_hooks = dict(

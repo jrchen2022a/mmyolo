@@ -111,11 +111,13 @@ def main():
         # if 'runner_type' is set in the cfg
         runner = RUNNERS.build(cfg)
 
+    if cfg.wandb_offline is True:
+        os.environ["WANDB_API_KEY"] = "afd3c3a3d6ecf060c34f7104f9ce084f61404c3d"
+        os.environ["WANDB_MODE"] = "offline"
+
     # start training
     runner.train()
 
 
 if __name__ == '__main__':
-    from torch.autograd import set_detect_anomaly
-    set_detect_anomaly(True)
     main()
