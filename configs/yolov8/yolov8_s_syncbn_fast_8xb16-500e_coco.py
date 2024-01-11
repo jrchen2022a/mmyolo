@@ -86,7 +86,8 @@ loss_dfl_weight = 1.5 / 4
 lr_factor = 0.01  # Learning rate scaling factor
 weight_decay = 0.0005
 # Save model checkpoint and validation intervals in stage 1
-save_epoch_intervals = 10
+save_epoch_intervals = 1
+val_intervals = 10
 # validation intervals in stage 2
 val_interval_stage2 = 1
 # The maximum checkpoints to keep.
@@ -327,7 +328,7 @@ test_evaluator = val_evaluator
 train_cfg = dict(
     type='EpochBasedTrainLoop',
     max_epochs=max_epochs,
-    val_interval=save_epoch_intervals,
+    val_interval=val_intervals,
     dynamic_intervals=[((max_epochs - close_mosaic_epochs),
                         val_interval_stage2)])
 

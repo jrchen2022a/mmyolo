@@ -1,21 +1,10 @@
-# 占用13G
+# 22G 3090 1:28day
 _base_ = './yolov8_m_syncbn_fast_8xb16-500e_coco.py'
 base_lr = 0.0025
 optim_wrapper = dict(
     optimizer=dict(
         lr=base_lr))
-train_batch_size_per_gpu = 8
-train_num_workers = 2
-
-train_dataloader = dict(
-    batch_size=train_batch_size_per_gpu,
-    num_workers=train_num_workers)
-
-optim_wrapper = dict(
-    optimizer=dict(
-        batch_size_per_gpu=train_batch_size_per_gpu))
-
-work_dir = './work_dirs/coco/yolov8_m_syncbn_fast_4xb8-500e_coco_fuser/'
+work_dir = './work_dirs/coco/yolov8_m_syncbn_fast_1xb16-500e_coco_fuser/'
 visualizer = dict(
     vis_backends=[
         dict(type='LocalVisBackend'),
