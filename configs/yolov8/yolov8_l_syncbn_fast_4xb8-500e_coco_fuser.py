@@ -11,7 +11,7 @@ optim_wrapper = dict(
     optimizer=dict(
         batch_size_per_gpu=train_batch_size_per_gpu))
 
-work_dir = '/home/jrchen/researches/mmyolo_older/work_dirs/coco/yolov8_l_syncbn_fast_4xb8-500e_coco_fuser/'
+work_dir = '/root/autodl-tmp/work_dirs/coco/yolov8_l_syncbn_fast_4xb8-500e_coco_fuser/'
 visualizer = dict(
     vis_backends=[
         dict(type='LocalVisBackend'),

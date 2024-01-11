@@ -2,7 +2,7 @@ _base_ = '../_base_/default_runtime.py'
 
 # ========================Frequently modified parameters======================
 # -----data related-----
-data_root = '/home/jrchen/datasets/coco/'  # Root path of data
+data_root = '/root/autodl-tmp/coco/'  # Root path of data
 # Path of train annotation file
 train_ann_file = 'annotations/instances_train2017.json'
 train_data_prefix = 'train2017/'  # Prefix of train image path
@@ -41,9 +41,9 @@ img_scale = (640, 640)  # width, height
 # Dataset type, this will be used to define the dataset
 dataset_type = 'YOLOv5CocoDataset'
 # Batch size of a single GPU during validation
-val_batch_size_per_gpu = 1
+val_batch_size_per_gpu = 8
 # Worker to pre-fetch data for each single GPU during validation
-val_num_workers = 2
+val_num_workers = 16
 
 # Config of batch shapes. Only on val.
 # We tested YOLOv8-m will get 0.02 higher than not using it.
@@ -86,7 +86,8 @@ loss_dfl_weight = 1.5 / 4
 lr_factor = 0.01  # Learning rate scaling factor
 weight_decay = 0.0005
 # Save model checkpoint and validation intervals in stage 1
-save_epoch_intervals = 10
+save_epoch_intervals = 1
+val_intervals = 10
 # validation intervals in stage 2
 val_interval_stage2 = 1
 # The maximum checkpoints to keep.
@@ -327,7 +328,7 @@ test_evaluator = val_evaluator
 train_cfg = dict(
     type='EpochBasedTrainLoop',
     max_epochs=max_epochs,
-    val_interval=save_epoch_intervals,
+    val_interval=val_intervals,
     dynamic_intervals=[((max_epochs - close_mosaic_epochs),
                         val_interval_stage2)])
 

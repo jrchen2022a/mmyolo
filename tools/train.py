@@ -54,7 +54,7 @@ def parse_args():
 
 def main():
     args = parse_args()
-
+    
     # register all modules in mmdet into the registries
     # do not init the default scope here because it will be init in the runner
     register_all_modules(init_default_scope=False)
@@ -116,6 +116,6 @@ def main():
 
 
 if __name__ == '__main__':
-    from torch.autograd import set_detect_anomaly
-    set_detect_anomaly(True)
+    os.environ["WANDB_API_KEY"] = "afd3c3a3d6ecf060c34f7104f9ce084f61404c3d"
+    os.environ["WANDB_MODE"] = "offline"
     main()
