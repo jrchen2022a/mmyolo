@@ -1,5 +1,6 @@
 FROM pytorch/pytorch:1.10.0-cuda11.3-cudnn8-runtime
 
+
 RUN apt-get update \
     && apt-get install -y ffmpeg libsm6 libxext6 git ninja-build libglib2.0-0 libxrender-dev\
     && apt-get clean \
