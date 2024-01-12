@@ -1,10 +1,14 @@
 # 21G 3090 1:28day
 _base_ = './yolov8_m_mask-refine_syncbn_fast_8xb16-500e_coco.py'
-# base_lr = 0.0025
-# optim_wrapper = dict(
-#     optimizer=dict(
-#         lr=base_lr))
-work_dir = _base_.work_dir_root+'/work_dirs/coco/yolov8_m_mask-refine_syncbn_fast_4xb16-500e_coco_fuser/'
+train_batch_size_per_gpu = 64
+train_num_workers = 8
+train_dataloader = dict(
+    batch_size=train_batch_size_per_gpu)
+optim_wrapper = dict(
+    optimizer=dict(
+        batch_size_per_gpu=train_batch_size_per_gpu))
+
+work_dir = _base_.work_dir_root+'/work_dirs/coco/yolov8_m_mask-refine_syncbn_fast_1xb64-500e_coco_fuser/'
 visualizer = dict(
     vis_backends=[
         dict(type='LocalVisBackend'),

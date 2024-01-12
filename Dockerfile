@@ -16,7 +16,7 @@ RUN git clone https://github.com/jrchen2022a/mmyolo.git /public/home/s2021201179
     pip install -r requirements/albu.txt && \
     pip install --no-cache-dir -e .
 RUN pip uninstall yapf -y && \
-    pip install yapf==0.32.0 
+    pip install yapf==0.32.0 \
+RUN wandb offline
 WORKDIR /public/home/s202120117978/mmyolo
-
 
