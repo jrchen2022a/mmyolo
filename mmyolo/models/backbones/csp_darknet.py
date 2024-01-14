@@ -66,6 +66,7 @@ class YOLOv5CSPDarknet(BaseBackbone):
     }
 
     def __init__(self,
+                 scam_insert_idx:int=-1,
                  arch: str = 'P5',
                  plugins: Union[dict, List[dict]] = None,
                  deepen_factor: float = 1.0,
@@ -80,6 +81,7 @@ class YOLOv5CSPDarknet(BaseBackbone):
                  init_cfg: OptMultiConfig = None):
         super().__init__(
             self.arch_settings[arch],
+            scam_insert_idx,
             deepen_factor,
             widen_factor,
             input_channels=input_channels,
@@ -209,6 +211,7 @@ class YOLOv8CSPDarknet(BaseBackbone):
     }
 
     def __init__(self,
+                 scam_insert_idx: int = -1,
                  arch: str = 'P5',
                  last_stage_out_channels: int = 1024,
                  plugins: Union[dict, List[dict]] = None,
@@ -225,6 +228,7 @@ class YOLOv8CSPDarknet(BaseBackbone):
         self.arch_settings[arch][-1][1] = last_stage_out_channels
         super().__init__(
             self.arch_settings[arch],
+            scam_insert_idx,
             deepen_factor,
             widen_factor,
             input_channels=input_channels,

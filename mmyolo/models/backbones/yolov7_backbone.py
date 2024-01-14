@@ -128,6 +128,7 @@ class YOLOv7Backbone(BaseBackbone):
 
     def __init__(self,
                  arch: str = 'L',
+                 scam_insert_idx: int = -1,
                  deepen_factor: float = 1.0,
                  widen_factor: float = 1.0,
                  input_channels: int = 3,
@@ -143,6 +144,7 @@ class YOLOv7Backbone(BaseBackbone):
         self.arch = arch
         super().__init__(
             self.arch_settings[arch],
+            scam_insert_idx,
             deepen_factor,
             widen_factor,
             input_channels=input_channels,

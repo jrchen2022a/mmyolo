@@ -78,6 +78,7 @@ class BaseBackbone(BaseModule, metaclass=ABCMeta):
 
     def __init__(self,
                  arch_setting: list,
+                 scam_insert_idx:int = -1,
                  deepen_factor: float = 1.0,
                  widen_factor: float = 1.0,
                  input_channels: int = 3,
@@ -109,11 +110,12 @@ class BaseBackbone(BaseModule, metaclass=ABCMeta):
         self.norm_cfg = norm_cfg
         self.act_cfg = act_cfg
         self.plugins = plugins
+        self.scam_insert_idx = scam_insert_idx
 
         self.stem = self.build_stem_layer()
         self.layers = ['stem']
-
-        self.insert_SCAM_idx = 2
+        if self.scam_insert_idx == 0:
+            self.add_module(f'SCAM', SCAM(channel=make_divisible(arch_setting[0][0], self.widen_factor)))
         for idx, setting in enumerate(arch_setting):
             stage = []
             stage += self.build_stage_layer(idx, setting)
@@ -121,7 +123,7 @@ class BaseBackbone(BaseModule, metaclass=ABCMeta):
                 stage += self.make_stage_plugins(plugins, idx, setting)
             self.add_module(f'stage{idx + 1}', nn.Sequential(*stage))
             self.layers.append(f'stage{idx + 1}')
-            if idx == self.insert_SCAM_idx - 1:
+            if idx == self.scam_insert_idx - 1:
                 self.add_module(f'SCAM', SCAM(channel=make_divisible(setting[1], self.widen_factor)))
 
     @abstractmethod
@@ -226,7 +228,7 @@ class BaseBackbone(BaseModule, metaclass=ABCMeta):
             x = layer(x)
             if i in self.out_indices:
                 outs.append(x)
-            if i == self.insert_SCAM_idx:
+            if i == self.scam_insert_idx:
                 x = getattr(self, "SCAM")(x)
 
         return tuple(outs)

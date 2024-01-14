@@ -66,6 +66,7 @@ class YOLOv6EfficientRep(BaseBackbone):
 
     def __init__(self,
                  arch: str = 'P5',
+                 scam_insert_idx: int = -1,
                  plugins: Union[dict, List[dict]] = None,
                  deepen_factor: float = 1.0,
                  widen_factor: float = 1.0,
@@ -81,6 +82,7 @@ class YOLOv6EfficientRep(BaseBackbone):
         self.block_cfg = block_cfg
         super().__init__(
             self.arch_settings[arch],
+            scam_insert_idx,
             deepen_factor,
             widen_factor,
             input_channels=input_channels,
@@ -215,6 +217,7 @@ class YOLOv6CSPBep(YOLOv6EfficientRep):
 
     def __init__(self,
                  arch: str = 'P5',
+                 scam_insert_idx: int = -1,
                  plugins: Union[dict, List[dict]] = None,
                  deepen_factor: float = 1.0,
                  widen_factor: float = 1.0,
@@ -231,6 +234,7 @@ class YOLOv6CSPBep(YOLOv6EfficientRep):
         self.hidden_ratio = hidden_ratio
         super().__init__(
             arch=arch,
+            scam_insert_idx=scam_insert_idx,
             deepen_factor=deepen_factor,
             widen_factor=widen_factor,
             input_channels=input_channels,

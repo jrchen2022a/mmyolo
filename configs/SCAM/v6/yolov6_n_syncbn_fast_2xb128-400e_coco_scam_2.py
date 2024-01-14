@@ -7,6 +7,10 @@ optim_wrapper = dict(
     optimizer=dict(
         batch_size_per_gpu=train_batch_size_per_gpu))
 
+model = dict(
+    backbone=dict(
+        scam_insert_idx=2))
+
 work_dir = _base_.work_dir_root+'/work_dirs/coco/yolov6_n_syncbn_fast_2x128-400e_coco_SCAM_2/'
 visualizer = dict(
     vis_backends=[
