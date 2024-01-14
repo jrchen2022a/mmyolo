@@ -17,11 +17,11 @@ RUN pip install yapf==0.32.0 &&  \
 #COPY . $WORK_PATH
 RUN git clone https://github.com/jrchen2022a/mmyolo.git "$WORK_PATH" && \
     cd $WORK_PATH && \
-    git checkout dev-custom
+    git checkout feat/SCAM
 
 RUN cd $WORK_PATH && \
     pip install --no-cache-dir -r requirements/albu.txt && \
-    pip install --no-cache-dir -v .
+    pip install -v -e .
 
 RUN wandb offline
 
