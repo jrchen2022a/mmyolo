@@ -113,7 +113,7 @@ class BaseBackbone(BaseModule, metaclass=ABCMeta):
         self.stem = self.build_stem_layer()
         self.layers = ['stem']
 
-        self.insert_SCAM_idx = 1
+        self.insert_SCAM_idx = 2
         for idx, setting in enumerate(arch_setting):
             stage = []
             stage += self.build_stage_layer(idx, setting)
