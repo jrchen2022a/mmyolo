@@ -1,0 +1,25 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches:
+      - 'feat/SCAM'
+
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Docker login
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+    - name: Build the Docker image
+      run: docker build --file Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/mmyolo_custom:scam .
+    - name: Docker image push
+      run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/mmyolo_custom:scam
