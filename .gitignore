@@ -109,9 +109,6 @@ data
 .idea
 .DS_Store
 ._*
-mmdet/
-mmengine/
-mmcv/
 
 # custom
 *.pkl
@@ -120,7 +117,6 @@ mmcv/
 docs/modelzoo_statistics.md
 mmyolo/.mim
 output/
-work_dirs
 yolov5-6.1/
 
 # Pytorch
