@@ -1,5 +1,19 @@
 import torch
 from torch import nn
+class AdaptiveLayerNorm(nn.Module):
+    def __init__(self, num_features, eps=1e-5):
+        super(AdaptiveLayerNorm, self).__init__()
+        self.num_features = num_features
+        self.eps = eps
+        self.gamma = nn.Parameter(torch.ones(num_features))
+        self.beta = nn.Parameter(torch.zeros(num_features))
+
+    def forward(self, x):
+        mean = x.mean(dim=[2,3], keepdims=True)
+        std = x.std(dim=[2,3], keepdims=True)
+        x_normalized = (x - mean) / (std + self.eps)
+        x_scaled = self.gamma.view(1, self.num_features, 1 ,1) *x_normalized + self.beta.view(1, self.num_features, 1, 1)
+        return x_scaled
 
 class SCAM(nn.Module):
     def __init__(self, channel, reduction=16):
@@ -13,7 +27,7 @@ class SCAM(nn.Module):
         self.conv4 = nn.Conv2d(in_channels=channel * 2, out_channels=channel, kernel_size=1, padding=0, stride=1, bias=False)
         self.softmax = nn.Softmax(dim=2)
         self.sigmoid = nn.Sigmoid()
-        self.BN = nn.BatchNorm2d(channel)
+        self.LN = AdaptiveLayerNorm(channel)
 
 
     def forward(self, x):
@@ -33,6 +47,6 @@ class SCAM(nn.Module):
         sa = self.sigmoid(torch.matmul(x_h.transpose(-1,-2), x_w))
         channel_weights = self.sigmoid(torch.matmul(x.view(b, c, h * w), sa.view(b, h * w, 1)).view(b, c, 1, 1))
         out = torch.cat((self.conv3(x) * sa.view(b, 1, h, w), x * channel_weights.expand_as(x)), 1)
-        out = self.BN(self.conv4(out))
+        out = self.LN(self.conv4(out))
 
         return out + x
