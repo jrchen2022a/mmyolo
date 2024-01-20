@@ -1,5 +1,4 @@
 work_dir_root = '.'
-wandb_offline = False
 
 default_scope = 'mmyolo'
 
@@ -20,12 +19,11 @@ env_cfg = dict(
 wandb_project_name = 'research-dw-models-unified'
 wandb_gen_project_name = 'researches_generality_test_unified'
 wandb_standard_gen_project_name = 'researches_generality_test_standard'
-wandb_init_kwargs = dict(project=wandb_project_name)
 visualizer = dict(
     type='mmdet.DetLocalVisualizer',
     vis_backends=[
         dict(type='LocalVisBackend'),
-        dict(type='WandbVisBackend',init_kwargs=wandb_init_kwargs)
+        dict(type='WandbVisBackend', init_kwargs=dict(project=wandb_project_name))
     ],
     name='visualizer')
 
