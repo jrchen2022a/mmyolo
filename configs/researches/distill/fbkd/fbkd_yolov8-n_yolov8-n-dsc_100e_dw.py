@@ -1,9 +1,7 @@
-_base_ = [
-    '../../_base_/default_runtime_v8_100e.py',
-    '../../_base_/schedule_v8_4xb16_100e.py'
-]
+_base_ = '../../_base_/schedule_v8_4xb16_100e.py'
 
-# work_dir = _base_.work_dir_root+'/work_dirs/dianwang/yolov8_n_syncbn_fast_4xb16-100e_dw_fbkd_dsc/'
+# work_dir = (_base_.work_dir_root+'/work_dirs/{0}/yolov8_n_syncbn_fast_4xb16-100e_dw_fbkd_dsc/'
+#             .format(_base_.wandb_project_name))
 # visualizer = dict(
 #     vis_backends=[
 #         dict(type='LocalVisBackend'),
