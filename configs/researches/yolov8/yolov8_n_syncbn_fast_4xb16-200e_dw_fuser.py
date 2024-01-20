@@ -1,18 +1,17 @@
 _base_ = './yolov8_n_syncbn_fast_4xb16-200e_dw.py'
 
-work_dir = _base_.work_dir_root+'/work_dirs/dianwang/yolov8_n_syncbn_fast_' + str(_base_.nGPU) + 'xb' + str(
-    _base_.train_batch_size_per_gpu) + '-' + str(_base_.max_epochs) + 'e_dw_fuser/'
-visualizer = dict(
-    vis_backends=[
-        dict(type='LocalVisBackend'),
-        dict(type='WandbVisBackend', init_kwargs=dict(project=_base_.wandb_project_name, name='yolov8_n_fuser'))
-    ])
-# work_dir = _base_.work_dir_root+'/work_dirs/temp/'
+# work_dir = _base_.work_dir_root+'/work_dirs/dianwang/yolov8_n_syncbn_fast_' + str(_base_.nGPU) + 'xb' + str(
+#     _base_.train_batch_size_per_gpu) + '-' + str(_base_.max_epochs) + 'e_dw_fuser/'
 # visualizer = dict(
 #     vis_backends=[
 #         dict(type='LocalVisBackend'),
-#         dict(type='WandbVisBackend', init_kwargs=dict(project='temp', name='yolov8_n_selector'))
+#         dict(type='WandbVisBackend', init_kwargs=dict(project=_base_.wandb_project_name, name='yolov8_n_fuser'))
 #     ])
+work_dir = _base_.work_dir_root+'/work_dirs/temp/'
+visualizer = dict(
+    vis_backends=[
+        dict(type='LocalVisBackend')
+    ])
 # _base_.wandb_project_name
 # 'temp'
 model = dict(
