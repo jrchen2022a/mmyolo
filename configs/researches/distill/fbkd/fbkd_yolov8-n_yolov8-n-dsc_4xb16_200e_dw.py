@@ -1,17 +1,17 @@
 _base_ = '../../_base_/schedule_v8_4xb16_100e.py'
 
-# work_dir = (_base_.work_dir_root+'/work_dirs/{0}/yolov8_n_syncbn_fast_4xb16-100e_dw_fbkd_dsc/'
-#             .format(_base_.wandb_project_name))
-# visualizer = dict(
-#     vis_backends=[
-#         dict(type='LocalVisBackend'),
-#         dict(type='WandbVisBackend', init_kwargs=dict(project=_base_.wandb_project_name, name='yolov8_n_fbkd_dsc'))
-#     ])
-work_dir = _base_.work_dir_root+'/work_dirs/temp/'
+work_dir = (_base_.work_dir_root+'/work_dirs/{0}/fbkd_yolov8-n_yolov8-n-dsc_4xb16_200e_dw.py/'
+            .format(_base_.wandb_project_name))
 visualizer = dict(
     vis_backends=[
-        dict(type='LocalVisBackend')
+        dict(type='LocalVisBackend'),
+        dict(type='WandbVisBackend', init_kwargs=dict(project=_base_.wandb_project_name, name='yolov8_n_fbkd_dsc'))
     ])
+# work_dir = _base_.work_dir_root+'/work_dirs/temp/'
+# visualizer = dict(
+#     vis_backends=[
+#         dict(type='LocalVisBackend')
+#     ])
 
 stages_output_channels = {
     'n': [32,  64,  128, 256],
@@ -26,7 +26,7 @@ model = dict(
     _scope_='mmrazor',
     type='SingleTeacherDistill',
     architecture=dict(
-        cfg_path='mmyolo::researches/yolov8/yolov8_n_syncbn_fast_4xb16-200e_dw.py',
+        cfg_path='mmyolo::researches/distill/students/yolov8-n-dsc_syncbn_fast_4xb16-200e_dw.py',
         pretrained=False),
     teacher=dict(
         cfg_path='mmyolo::researches/yolov8/yolov8_n_syncbn_fast_4xb16-200e_dw_fuser.py',
@@ -146,4 +146,4 @@ model = dict(
 
 find_unused_parameters = True
 
-val_cfg = dict(_delete_=True, type='mmrazor.SingleTeacherDistillValLoop')
+val_cfg = dict(type='mmrazor.SingleTeacherDistillValLoop')

@@ -7,6 +7,7 @@ from .yolo_bricks import (BepC3StageBlock, CSPLayerWithTwoConv,
                           RepStageBlock, RepVGGBlock, SPPFBottleneck,
                           SPPFCSPBlock, TinyDownSampleBlock)
 from .selector_csp_layer import (SelectorCSPLayerV2, SelectorCSPLayerWithTwoConv)
+from .depth_separable_layer import DepthSeparableLayer
 
 __all__ = [
     'SPPFBottleneck', 'RepVGGBlock', 'RepStageBlock', 'ExpMomentumEMA',
@@ -14,5 +15,5 @@ __all__ = [
     'PPYOLOEBasicBlock', 'EffectiveSELayer', 'TinyDownSampleBlock',
     'EELANBlock', 'ImplicitA', 'ImplicitM', 'BepC3StageBlock',
     'CSPLayerWithTwoConv', 'DarknetBottleneck',
-    'SelectorCSPLayerV2', 'SelectorCSPLayerWithTwoConv'
+    'SelectorCSPLayerV2', 'SelectorCSPLayerWithTwoConv', 'DepthSeparableLayer'
 ]
