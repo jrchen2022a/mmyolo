@@ -5,28 +5,6 @@ model = dict(
         type='DepthSeparableBackbone'
     ))
 
-max_epochs = 200
-default_hooks = dict(
-    param_scheduler=dict(
-        max_epochs=max_epochs))
-custom_hooks = [
-    dict(
-        type='EMAHook',
-        ema_type='ExpMomentumEMA',
-        momentum=0.0001,
-        update_buffers=True,
-        strict_load=False,
-        priority=49),
-    dict(
-        type='mmdet.PipelineSwitchHook',
-        switch_epoch=max_epochs - _base_.close_mosaic_epochs,
-        switch_pipeline=_base_.train_pipeline_stage2)
-]
-train_cfg = dict(
-    max_epochs=max_epochs,
-    dynamic_intervals=[((max_epochs - _base_.close_mosaic_epochs),
-                        _base_.val_interval_stage2)])
-
 work_dir = (_base_.work_dir_root+'/work_dirs/{0}/yolov8-n-dsc_4xb16_200e_dw.py/'
             .format(_base_.wandb_project_name))
 visualizer = dict(

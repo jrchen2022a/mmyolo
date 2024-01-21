@@ -115,6 +115,6 @@ def main():
 
 
 if __name__ == '__main__':
-    os.environ["WANDB_API_KEY"] = "afd3c3a3d6ecf060c34f7104f9ce084f61404c3d"
-    os.environ["WANDB_MODE"] = "offline"
+    # os.environ["WANDB_API_KEY"] = "afd3c3a3d6ecf060c34f7104f9ce084f61404c3d"
+    # os.environ["WANDB_MODE"] = "offline"
     main()
