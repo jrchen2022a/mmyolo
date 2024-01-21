@@ -8,7 +8,7 @@ from mmdet.utils import ConfigType, OptMultiConfig
 from mmyolo.registry import MODELS
 from . import YOLOv8CSPDarknet
 from ..layers import SPPFBottleneck
-from ..layers import SelectorCSPLayerV2, SelectorCSPLayerWithTwoConv
+from ..layers import SelectorCSPLayerV2, SelectorCSPLayerWithTwoConv, CSPLayerWithTwoConv
 from ..utils import make_divisible, make_round
 from .base_backbone import BaseBackbone
 
@@ -28,6 +28,7 @@ class YOLOv5SelectorCSPDarknet(BaseBackbone):
     selector_settings = {
         'SelectorCSPLayerV2': SelectorCSPLayerV2
     }
+
     def __init__(self,
                  num_selectors: int = 3,
                  selector_type: str = 'SelectorCSPLayer',
@@ -129,6 +130,7 @@ class YOLOv8SelectorCSPDarknet(YOLOv8CSPDarknet):
     }
 
     def __init__(self,
+                 version: int = 1,  # v1:backbone的csp全加，v2:backbone的3个连接处加
                  num_selectors: int = 3,
                  selector_type: str = 'SelectorCSPLayerWithTwoConv',
                  arch: str = 'P5',
@@ -144,6 +146,7 @@ class YOLOv8SelectorCSPDarknet(YOLOv8CSPDarknet):
                  act_cfg: ConfigType = dict(type='SiLU', inplace=True),
                  norm_eval: bool = False,
                  init_cfg: OptMultiConfig = None):
+        self.version = version
         self.num_selectors = num_selectors
         self.selector = self.selector_settings[selector_type]
         super().__init__(
@@ -175,14 +178,36 @@ class YOLOv8SelectorCSPDarknet(YOLOv8CSPDarknet):
             norm_cfg=self.norm_cfg,
             act_cfg=self.act_cfg)
         stage.append(conv_layer)
-        csp_layer = self.selector(
-            out_channels,
-            out_channels,
-            num_selectors=self.num_selectors,
-            num_blocks=num_blocks,
-            add_identity=add_identity,
-            norm_cfg=self.norm_cfg,
-            act_cfg=self.act_cfg)
+
+        if self.version == 1:
+            csp_layer = self.selector(
+                out_channels,
+                out_channels,
+                num_selectors=self.num_selectors,
+                num_blocks=num_blocks,
+                add_identity=add_identity,
+                norm_cfg=self.norm_cfg,
+                act_cfg=self.act_cfg)
+        elif self.version == 2:
+            if stage_idx == 0:
+                csp_layer = CSPLayerWithTwoConv(
+                    out_channels,
+                    out_channels,
+                    num_blocks=num_blocks,
+                    add_identity=add_identity,
+                    norm_cfg=self.norm_cfg,
+                    act_cfg=self.act_cfg)
+            else:
+                csp_layer = self.selector(
+                    out_channels,
+                    out_channels,
+                    num_selectors=self.num_selectors,
+                    num_blocks=num_blocks,
+                    add_identity=add_identity,
+                    norm_cfg=self.norm_cfg,
+                    act_cfg=self.act_cfg)
+        else:
+            csp_layer = None
         stage.append(csp_layer)
         if use_spp:
             spp = SPPFBottleneck(

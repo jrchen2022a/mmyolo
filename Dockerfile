@@ -25,7 +25,5 @@ RUN cd $WORK_PATH && \
     pip install --no-cache-dir -r requirements/albu.txt && \
     pip install --no-cache-dir -v .
 
-RUN wandb offline
 
 WORKDIR $WORK_PATH
-#CMD ["bash","tools/dist_train.sh","configs/yolov8/yolov8_l_mask-refine_syncbn_fast_1xb32-500e_coco_fuser.py","1","--resume"]
