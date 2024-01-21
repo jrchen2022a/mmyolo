@@ -43,7 +43,7 @@ stages_output_channels = {
     'x': [160, 320, 640, 640]
 }
 
-teacher_ckpt = 'work_dirs/dianwang/yolov8_n_syncbn_fast_4xb16-200e_dw_fuser/20231218_024819*/epoch_200.pth'
+teacher_ckpt = 'work_dirs/dianwang/yolov8_n_syncbn_fast_4xb16-200e_dw_fuser/20231218_024819*/best_coco/off_precision_epoch_175.pth'
 model = dict(
     _scope_='mmrazor',
     type='SingleTeacherDistill',
@@ -57,35 +57,18 @@ model = dict(
     distiller=dict(
         type='ConfigurableDistiller',
         student_recorders=dict(
-            stage_s1=dict(type='ModuleInputs', source='backbone.stage2.0.conv1'),
-            stage_s2=dict(type='ModuleInputs', source='backbone.stage3.0.conv1'),
-            stage_s3=dict(type='ModuleInputs', source='backbone.stage4.0.conv1'),
-            stage_s4=dict(type='ModuleInputs', source='backbone.stage4.1.conv1.conv')),
+            stage_s2=dict(type='ModuleInputs', source='neck.reduce_layers.0'),
+            stage_s3=dict(type='ModuleInputs', source='neck.reduce_layers.1'),
+            stage_s4=dict(type='ModuleInputs', source='neck.reduce_layers.2')),
         teacher_recorders=dict(
-            stage_s1=dict(type='ModuleInputs', source='backbone.stage2.0.conv'),
-            stage_s2=dict(type='ModuleInputs', source='backbone.stage3.0.conv'),
-            stage_s3=dict(type='ModuleInputs', source='backbone.stage4.0.conv'),
-            stage_s4=dict(type='ModuleInputs', source='backbone.stage4.2.conv1.conv')),
+            stage_s2=dict(type='ModuleInputs', source='neck.reduce_layers.0'),
+            stage_s3=dict(type='ModuleInputs', source='neck.reduce_layers.1'),
+            stage_s4=dict(type='ModuleInputs', source='neck.reduce_layers.2')),
         distill_losses=dict(
-            loss_s1=dict(type='FBKDLoss'),
             loss_s2=dict(type='FBKDLoss'),
             loss_s3=dict(type='FBKDLoss'),
             loss_s4=dict(type='FBKDLoss')),
         connectors=dict(
-            loss_s1_sfeat=dict(
-                type='FBKDStudentConnector',
-                in_channels=stages_output_channels['n'][0],
-                reduction=4,
-                mode='dot_product',
-                sub_sample=True,
-                maxpool_stride=8),
-            loss_s1_tfeat=dict(
-                type='FBKDTeacherConnector',
-                in_channels=stages_output_channels['n'][0],
-                reduction=4,
-                mode='dot_product',
-                sub_sample=True,
-                maxpool_stride=8),
             loss_s2_sfeat=dict(
                 type='FBKDStudentConnector',
                 in_channels=stages_output_channels['n'][1],
@@ -121,17 +104,6 @@ model = dict(
                 mode='dot_product',
                 sub_sample=True)),
         loss_forward_mappings=dict(
-            loss_s1=dict(
-                s_input=dict(
-                    from_student=True,
-                    recorder='stage_s1',
-                    connector='loss_s1_sfeat',
-                    data_idx=0),
-                t_input=dict(
-                    from_student=False,
-                    recorder='stage_s1',
-                    connector='loss_s1_tfeat',
-                    data_idx=0)),
             loss_s2=dict(
                 s_input=dict(
                     from_student=True,
