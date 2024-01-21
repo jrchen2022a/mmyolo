@@ -1,5 +1,5 @@
 # -----data related-----
-data_root = '/home/jrchen/datasets/researches/'  # Root path of data
+data_root = 'data/researches/'  # Root path of data
 # Path of train annotation file
 train_ann_file = 'annotations/trainval.json'
 train_data_prefix = 'images/'  # Prefix of train image path
