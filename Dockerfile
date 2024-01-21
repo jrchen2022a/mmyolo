@@ -10,11 +10,11 @@ RUN apt-get update &&  \
     rm -rf /var/lib/apt/lists/*
 
 RUN pip install yapf==0.32.0 &&  \
-    pip install --no-cache-dir mmengine==0.5.0  && \
-    pip install --no-cache-dir mmcv==2.0.0rc4 -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.10/index.html && \
-    pip install --no-cache-dir mmdet==3.0.0rc5 wandb
+    pip install mmengine==0.5.0  && \
+    pip install mmcv==2.0.0rc4 -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.10/index.html && \
+    pip install mmdet==3.0.0rc5 wandb
 
-RUN pip install --no-cache-dir mmrazor==1.0.0
+RUN pip install mmrazor==1.0.0
 
 COPY . $WORK_PATH
 #RUN git clone https://github.com/jrchen2022a/mmyolo.git "$WORK_PATH" && \
@@ -22,7 +22,7 @@ COPY . $WORK_PATH
 #    git checkout dev-custom
 
 RUN cd $WORK_PATH && \
-    pip install --no-cache-dir -r requirements/albu.txt && \
+    pip install -r requirements/albu.txt && \
     pip install --no-cache-dir -v .
 
 
