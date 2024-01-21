@@ -14,6 +14,7 @@ from ..utils import make_divisible
 class DepthSeparableBackbone(YOLOv8CSPDarknet):
 
     def __init__(self,
+                 version: str = 'v1',
                  arch: str = 'P5',
                  last_stage_out_channels: int = 1024,
                  plugins: Union[dict, List[dict]] = None,
@@ -27,6 +28,7 @@ class DepthSeparableBackbone(YOLOv8CSPDarknet):
                  act_cfg: ConfigType = dict(type='SiLU', inplace=True),
                  norm_eval: bool = False,
                  init_cfg: OptMultiConfig = None):
+        self.version = version
         super().__init__(
             arch=arch,
             last_stage_out_channels=last_stage_out_channels,
@@ -46,19 +48,28 @@ class DepthSeparableBackbone(YOLOv8CSPDarknet):
         in_channels = make_divisible(in_channels, self.widen_factor)
         out_channels = make_divisible(out_channels, self.widen_factor)
         stage = []
-        conv_layer = ConvModule(
-            in_channels,
-            out_channels,
-            kernel_size=3,
-            stride=2,
-            padding=1,
-            norm_cfg=self.norm_cfg,
-            act_cfg=self.act_cfg)
-        stage.append(conv_layer)
-        depth_separable_layer = DepthSeparableLayer(
-            out_channels,
-            out_channels)
-        stage.append(depth_separable_layer)
+        if self.version == 'v1':
+            conv_layer = ConvModule(
+                in_channels,
+                out_channels,
+                kernel_size=3,
+                stride=2,
+                padding=1,
+                norm_cfg=self.norm_cfg,
+                act_cfg=self.act_cfg)
+            stage.append(conv_layer)
+            depth_separable_layer = DepthSeparableLayer(
+                out_channels,
+                out_channels)
+            stage.append(depth_separable_layer)
+        elif self.version == 'v2':
+            depth_separable_layer = DepthSeparableLayer(
+                in_channels,
+                out_channels,
+                kernel_size=3,
+                stride=2,
+                padding=1)
+            stage.append(depth_separable_layer)
         if use_spp:
             spp = SPPFBottleneck(
                 out_channels,
