@@ -1,4 +1,4 @@
-_base_ = ['../../_base_/schedule_v8_8xb16_500e.py', '../students/yolov8-n-dscv2.py']
+_base_ = ['../../_base_/dw_schedule_v8_8xb16_500e.py', '../students/yolov8-n-dscv2.py']
 wandb_project_name = 'distill_exp'
 max_epochs = 200
 default_hooks = dict(

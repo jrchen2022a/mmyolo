@@ -1,4 +1,4 @@
-_base_ = '../_base_/schedule_v8_8xb16_500e.py'
+_base_ = '../_base_/dw_schedule_v8_8xb16_500e.py'
 
 model_test_cfg = dict(
     # The config of multi-label for multi-class prediction.

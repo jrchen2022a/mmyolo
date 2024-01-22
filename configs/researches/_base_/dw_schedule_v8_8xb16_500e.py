@@ -1,4 +1,4 @@
-_base_ = './default_runtime_v8_500e.py'
+_base_ = './dw_runtime_v8_500e.py'
 
 base_lr = 0.01
 weight_decay = 0.0005
