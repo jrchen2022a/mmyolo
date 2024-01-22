@@ -2,14 +2,8 @@
 _base_ = '../../../yolov8/yolov8_n_mask-refine_syncbn_fast_8xb16-500e_coco.py'
 
 train_batch_size_per_gpu = 2
-train_dataloader = dict(
-    batch_size=train_batch_size_per_gpu)
-optim_wrapper = dict(
-    optimizer=dict(
-        batch_size_per_gpu=train_batch_size_per_gpu))
+_base_.train_dataloader.batch_size=train_batch_size_per_gpu
+_base_.optim_wrapper.optimizer.batch_size_per_gpu=train_batch_size_per_gpu
 
 work_dir = 'work_dirs/temp/'
-visualizer = dict(
-    vis_backends=[
-        dict(type='LocalVisBackend')
-    ])
+_base_.visualizer.vis_backends=[dict(type='LocalVisBackend')]

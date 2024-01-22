@@ -1,5 +1,3 @@
-work_dir_root = '.'
-
 default_scope = 'mmyolo'
 
 default_hooks = dict(
@@ -16,8 +14,8 @@ env_cfg = dict(
     dist_cfg=dict(backend='nccl'),
 )
 
-wandb_project_name = 'research-dw-models-unified'
-wandb_gen_project_name = 'researches_generality_test_unified'
+wandb_project_name = 'research_dw_models_exp'
+wandb_gen_project_name = 'researches_generality_test'
 wandb_standard_gen_project_name = 'researches_generality_test_standard'
 visualizer = dict(
     type='mmdet.DetLocalVisualizer',
@@ -26,6 +24,7 @@ visualizer = dict(
         dict(type='WandbVisBackend', init_kwargs=dict(project=wandb_project_name))
     ],
     name='visualizer')
+work_dir_root = './work_dirs/{0}/'.format(wandb_project_name)
 
 log_processor = dict(type='LogProcessor', window_size=50, by_epoch=True)
 
