@@ -4,9 +4,7 @@ wandb_project_name = 'distill_exp'
 model = dict(
     backbone=dict(
         type='DepthSeparableBackbone',
-        version='v2'),
-    bbox_head=dict(
-        loss_dfl=dict(loss_weight=0)))
+        version='v2'))
 
 work_dir = (_base_.work_dir_root+'/work_dirs/{0}/yolov8-n-dscv2_4xb16_200e_dw/'
             .format(wandb_project_name))
