@@ -1,11 +1,5 @@
 _base_ = '../../_base_/schedule_v8_8xb16_500e.py'
-
-work_dir = _base_.work_dir_root+'/work_dirs/temp/'
-visualizer = dict(
-    vis_backends=[
-        dict(type='LocalVisBackend')
-    ])
-
+wandb_project_name = 'distill_exp'
 max_epochs = 200
 default_hooks = dict(
     param_scheduler=dict(
