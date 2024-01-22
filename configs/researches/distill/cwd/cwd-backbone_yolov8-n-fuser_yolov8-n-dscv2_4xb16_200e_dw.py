@@ -1,3 +1,4 @@
+# _base_ = '../algorithm_agnostic/debug.py'
 _base_ = '../algorithm_agnostic/distill-backbone_yolov8-n-fuser_yolov8-n-dscv2_8xb16_200e_dw.py'
 
 work_dir = (_base_.work_dir_root + '/work_dirs/{0}/cwd-backbone_yolov8-n-fuser_yolov8-n-dscv2_4xb16_200e_dw/'

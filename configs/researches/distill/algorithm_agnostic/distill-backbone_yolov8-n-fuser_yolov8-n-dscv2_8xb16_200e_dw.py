@@ -53,14 +53,14 @@ model = dict(
             stage_s4=dict(type='ModuleInputs', source='neck.reduce_layers.2')),
         loss_forward_mappings=dict(
             loss_s2=dict(
-                preds_S=dict(from_student=True,  recorder='stage_s2'),
-                preds_T=dict(from_student=False, recorder='stage_s2')),
+                preds_S=dict(from_student=True,  recorder='stage_s2', data_idx=0),
+                preds_T=dict(from_student=False, recorder='stage_s2', data_idx=0)),
             loss_s3=dict(
-                preds_S=dict(from_student=True,  recorder='stage_s3'),
-                preds_T=dict(from_student=False, recorder='stage_s3')),
+                preds_S=dict(from_student=True,  recorder='stage_s3', data_idx=0),
+                preds_T=dict(from_student=False, recorder='stage_s3', data_idx=0)),
             loss_s4=dict(
-                preds_S=dict(from_student=True,  recorder='stage_s4'),
-                preds_T=dict(from_student=False, recorder='stage_s4')))))
+                preds_S=dict(from_student=True,  recorder='stage_s4', data_idx=0),
+                preds_T=dict(from_student=False, recorder='stage_s4', data_idx=0)))))
 
 find_unused_parameters = True
 
