@@ -1,6 +1,5 @@
 _base_ = '../algorithm_agnostic/distill-backbone_yolov8-n-fuser_yolov8-n-dscv2_8xb16_200e_dw.py'
 
-
 work_dir = (_base_.work_dir_root + '/work_dirs/{0}/pkd-backbone_yolov8-n-fuser_yolov8-n-dscv2_4xb16_200e_dw/'
             .format(_base_.wandb_project_name))
 visualizer = dict(
@@ -9,13 +8,6 @@ visualizer = dict(
         dict(type='WandbVisBackend',
              init_kwargs=dict(project=_base_.wandb_project_name, name='pkd-backbone_yolov8-n-fuser_yolov8-n-dscv2'))
     ])
-
-# train_batch_size_per_gpu = 2
-# train_dataloader = dict(
-#     batch_size=train_batch_size_per_gpu)
-# optim_wrapper = dict(
-#     optimizer=dict(
-#         batch_size_per_gpu=_base_.train_batch_size_per_gpu))
 
 model = dict(
     distiller=dict(
