@@ -49,3 +49,5 @@ model = dict(
                 preds_T=dict(from_student=False, recorder='stage_s4', data_idx=0)))))
 
 find_unused_parameters = True
+
+del student
