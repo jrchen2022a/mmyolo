@@ -1,10 +1,4 @@
-_base_ = ['../../_base_/dw_schedule_v8_8xb16_500e.py', '../students/yolov8-n-dscv2.py']
-wandb_project_name = 'distill_exp'
-max_epochs = 200
-_base_.default_hooks.param_scheduler.max_epochs = max_epochs
-_base_.custom_hooks[1].switch_epoch = max_epochs - _base_.close_mosaic_epochs
-_base_.train_cfg.max_epochs = max_epochs
-_base_.train_cfg.dynamic_intervals = [((max_epochs - _base_.close_mosaic_epochs), _base_.val_interval_stage2)]
+_base_ = '../students/yolov8-n-dscv2.py'
 
 stages_output_channels = {
     'n': [32, 64, 128, 256],
@@ -39,6 +33,10 @@ model = dict(
             stage_s2=dict(type='ModuleInputs', source='neck.reduce_layers.0'),
             stage_s3=dict(type='ModuleInputs', source='neck.reduce_layers.1'),
             stage_s4=dict(type='ModuleInputs', source='neck.reduce_layers.2')),
+        distill_losses=dict(
+            loss_s2=dict(),
+            loss_s3=dict(),
+            loss_s4=dict()),
         loss_forward_mappings=dict(
             loss_s2=dict(
                 preds_S=dict(from_student=True,  recorder='stage_s2', data_idx=0),
@@ -51,5 +49,3 @@ model = dict(
                 preds_T=dict(from_student=False, recorder='stage_s4', data_idx=0)))))
 
 find_unused_parameters = True
-
-val_cfg = dict(type='mmrazor.SingleTeacherDistillValLoop')

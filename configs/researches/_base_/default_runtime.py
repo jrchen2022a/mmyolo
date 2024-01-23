@@ -1,3 +1,4 @@
+save_work_dir_root = './work_dirs/'
 default_scope = 'mmyolo'
 
 default_hooks = dict(
@@ -24,7 +25,7 @@ visualizer = dict(
         dict(type='WandbVisBackend', init_kwargs=dict(project=wandb_project_name))
     ],
     name='visualizer')
-work_dir_root = './work_dirs/{0}/'.format(wandb_project_name)
+work_dir_root = save_work_dir_root + wandb_project_name + '/'
 
 log_processor = dict(type='LogProcessor', window_size=50, by_epoch=True)
 

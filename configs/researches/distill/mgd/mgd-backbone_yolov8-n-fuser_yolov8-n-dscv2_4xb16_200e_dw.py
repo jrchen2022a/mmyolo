@@ -1,5 +1,6 @@
 # _base_ = '../algorithm_agnostic/debug.py'
-_base_ = '../algorithm_agnostic/distill-backbone_yolov8-n-fuser_yolov8-n-dscv2_8xb16_200e_dw.py'
+_base_ = ['../algorithm_agnostic/distill-dw_schedule_8xb16_200e_dw.py',
+          '../algorithm_agnostic/distill-backbone_yolov8-n-fuser_yolov8-n-dscv2.py']
 
 work_dir = _base_.work_dir_root+'{{fileBasenameNoExtension}}/'
 _base_.visualizer.vis_backends[1].init_kwargs.name = '{{fileBasenameNoExtension}}'
@@ -23,17 +24,10 @@ model = dict(
                 teacher_channels=_base_.stages_output_channels['n'][3],
                 lambda_mgd=0.65)),
         distill_losses=dict(
-            loss_mgd_s2=dict(type='MGDLoss', alpha_mgd=0.00002),
-            loss_mgd_s3=dict(type='MGDLoss', alpha_mgd=0.00002),
-            loss_mgd_s4=dict(type='MGDLoss', alpha_mgd=0.00002)),
+            loss_s2=dict(type='MGDLoss', alpha_mgd=0.00002),
+            loss_s3=dict(type='MGDLoss', alpha_mgd=0.00002),
+            loss_s4=dict(type='MGDLoss', alpha_mgd=0.00002)),
         loss_forward_mappings=dict(
-            _delete_=True,
-            loss_mgd_s2=dict(
-                preds_S=dict(from_student=True,  recorder='stage_s2', data_idx=0, connector='s2_connector'),
-                preds_T=dict(from_student=False, recorder='stage_s2', data_idx=0)),
-            loss_mgd_s3=dict(
-                preds_S=dict(from_student=True,  recorder='stage_s3', data_idx=0, connector='s3_connector'),
-                preds_T=dict(from_student=False, recorder='stage_s3', data_idx=0)),
-            loss_mgd_s4=dict(
-                preds_S=dict(from_student=True,  recorder='stage_s4', data_idx=0, connector='s4_connector'),
-                preds_T=dict(from_student=False, recorder='stage_s4', data_idx=0)))))
+            loss_s2=dict(preds_S=dict(connector='s2_connector')),
+            loss_s3=dict(preds_S=dict(connector='s3_connector')),
+            loss_s4=dict(preds_S=dict(connector='s4_connector')))))
