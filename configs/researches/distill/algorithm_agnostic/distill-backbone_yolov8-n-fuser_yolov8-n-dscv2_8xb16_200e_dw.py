@@ -1,26 +1,10 @@
 _base_ = ['../../_base_/dw_schedule_v8_8xb16_500e.py', '../students/yolov8-n-dscv2.py']
 wandb_project_name = 'distill_exp'
 max_epochs = 200
-default_hooks = dict(
-    param_scheduler=dict(
-        max_epochs=max_epochs))
-custom_hooks = [
-    dict(
-        type='EMAHook',
-        ema_type='ExpMomentumEMA',
-        momentum=0.0001,
-        update_buffers=True,
-        strict_load=False,
-        priority=49),
-    dict(
-        type='mmdet.PipelineSwitchHook',
-        switch_epoch=max_epochs - _base_.close_mosaic_epochs,
-        switch_pipeline=_base_.train_pipeline_stage2)
-]
-train_cfg = dict(
-    max_epochs=max_epochs,
-    dynamic_intervals=[((max_epochs - _base_.close_mosaic_epochs),
-                        _base_.val_interval_stage2)])
+_base_.default_hooks.param_scheduler.max_epochs = max_epochs
+_base_.custom_hooks[1].switch_epoch = max_epochs - _base_.close_mosaic_epochs
+_base_.train_cfg.max_epochs = max_epochs
+_base_.train_cfg.dynamic_intervals = [((max_epochs - _base_.close_mosaic_epochs), _base_.val_interval_stage2)]
 
 stages_output_channels = {
     'n': [32, 64, 128, 256],

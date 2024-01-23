@@ -1,13 +1,7 @@
 _base_ = '../algorithm_agnostic/distill-backbone_yolov8-n-fuser_yolov8-n-dscv2_8xb16_200e_dw.py'
 
-work_dir = (_base_.work_dir_root + '/work_dirs/{0}/{{fileBasenameNoExtension}}/'
-            .format(_base_.wandb_project_name))
-visualizer = dict(
-    vis_backends=[
-        dict(type='LocalVisBackend'),
-        dict(type='WandbVisBackend',
-             init_kwargs=dict(project=_base_.wandb_project_name, name='{{fileBasenameNoExtension}}'))
-    ])
+work_dir = _base_.work_dir_root+'{{fileBasenameNoExtension}}/'
+_base_.visualizer.vis_backends[1].init_kwargs.name = '{{fileBasenameNoExtension}}'
 
 model = dict(
     distiller=dict(

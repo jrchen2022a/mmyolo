@@ -2,18 +2,11 @@
 _base_ = '../../../yolov8/yolov8_n_mask-refine_syncbn_fast_8xb16-500e_coco.py'
 
 train_batch_size_per_gpu = 32
-train_dataloader = dict(
-    batch_size=train_batch_size_per_gpu)
-optim_wrapper = dict(
-    optimizer=dict(
-        batch_size_per_gpu=train_batch_size_per_gpu))
+_base_.train_dataloader.batch_size=train_batch_size_per_gpu
+_base_.optim_wrapper.optimizer.batch_size_per_gpu=train_batch_size_per_gpu
 
-work_dir = _base_.work_dir_root+'/work_dirs/coco/{{fileBasenameNoExtension}}/'
-visualizer = dict(
-    vis_backends=[
-        dict(type='LocalVisBackend'),
-        dict(type='WandbVisBackend', init_kwargs=dict(project='research_coco', name='mgd-backbone_yolov8-l-fuser-mr_yolov8-n'))
-    ])
+work_dir = _base_.work_dir_root+'{{fileBasenameNoExtension}}/'
+_base_.visualizer.vis_backends[1].init_kwargs.name = '{{fileBasenameNoExtension}}'
 
 stages_output_channels = {
     'n': [32, 64, 128, 256],
