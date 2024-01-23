@@ -1,5 +1,6 @@
 # 当你想调试时，_base_引入这个文件，并更改如下_base_
-_base_ = '../../../yolov8/yolov8_n_mask-refine_syncbn_fast_8xb16-500e_coco.py'
+_base_ = ['../algorithm_agnostic/distill-dw_schedule_8xb16_200e_dw.py',
+          '../algorithm_agnostic/distill-neck_yolov8-n-fuser_yolov8-n-dscv2.py']
 
 train_batch_size_per_gpu = 2
 _base_.train_dataloader.batch_size=train_batch_size_per_gpu
