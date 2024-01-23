@@ -39,12 +39,12 @@ model = dict(
                 teacher_channels=_base_.stages_output_channels['n'][3],
                 lambda_mgd=0.65)),
         distill_losses=dict(
-            loss_s2=dict(type='MGDLoss', alpha_mgd=0.00002),
-            loss_s3=dict(type='MGDLoss', alpha_mgd=0.00002),
-            loss_s4=dict(type='MGDLoss', alpha_mgd=0.00002),
-            loss_ns2=dict(type='MGDLoss', alpha_mgd=0.00002),
-            loss_ns3=dict(type='MGDLoss', alpha_mgd=0.00002),
-            loss_ns4=dict(type='MGDLoss', alpha_mgd=0.00002)),
+            loss_s2=dict(type='MGDLoss', alpha_mgd=0.002),
+            loss_s3=dict(type='MGDLoss', alpha_mgd=0.004),
+            loss_s4=dict(type='MGDLoss', alpha_mgd=0.006),
+            loss_ns2=dict(type='MGDLoss', alpha_mgd=0.002),
+            loss_ns3=dict(type='MGDLoss', alpha_mgd=0.004),
+            loss_ns4=dict(type='MGDLoss', alpha_mgd=0.006)),
         loss_forward_mappings=dict(
             loss_s2=dict(preds_S=dict(connector='s2_connector')),
             loss_s3=dict(preds_S=dict(connector='s3_connector')),
@@ -52,3 +52,10 @@ model = dict(
             loss_ns2=dict(preds_S=dict(connector='ns2_connector')),
             loss_ns3=dict(preds_S=dict(connector='ns3_connector')),
             loss_ns4=dict(preds_S=dict(connector='ns4_connector')))))
+
+del _base_.train_cfg['dynamic_intervals']
+del _base_.custom_hooks[1]
+del _base_.val_interval_stage2
+del _base_.train_pipeline
+del _base_.train_pipeline_stage2
+
