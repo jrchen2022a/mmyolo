@@ -8,7 +8,7 @@ stages_output_channels = {
     'x': [160, 320, 640, 640]
 }
 
-teacher_ckpt = 'work_dirs/dianwang/yolov8_n_syncbn_fast_4xb16-200e_dw_fuser/20231218_024819*/best_coco/off_precision_epoch_175.pth'
+teacher_ckpt = 'checkpoints/yolov8-n-fuser_best-dw.pth'
 student = _base_.model
 # student.neck.init_cfg = dict(
 #     type='Pretrained', prefix='neck.', checkpoint=teacher_ckpt)
