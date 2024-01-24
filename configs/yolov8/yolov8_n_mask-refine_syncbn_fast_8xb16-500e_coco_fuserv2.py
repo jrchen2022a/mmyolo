@@ -1,11 +1,11 @@
 #
-_base_ = './yolov8_s_mask-refine_syncbn_fast_8xb16-500e_coco.py'
+_base_ = './yolov8_n_mask-refine_syncbn_fast_8xb16-500e_coco.py'
 
 work_dir = _base_.work_dir_root+'/work_dirs/coco/{{fileBasenameNoExtension}}/'
 visualizer = dict(
     vis_backends=[
         dict(type='LocalVisBackend'),
-        dict(type='WandbVisBackend', init_kwargs=dict(project='research_coco', name='yolov8_s_fuserv2_mr'))
+        dict(type='WandbVisBackend', init_kwargs=dict(project='research_coco', name='yolov8_n_fuserv2_mr'))
     ])
 
 model = dict(
