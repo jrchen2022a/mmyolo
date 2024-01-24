@@ -5,6 +5,7 @@ ARG env="/mmyolo"
 ENV WORK_PATH=$env
 
 RUN apt-get update &&  \
+    apt-get install gcc && \
     apt-get install -y ffmpeg libsm6 libxext6 git ninja-build libglib2.0-0 libxrender-dev && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
