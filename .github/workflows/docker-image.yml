@@ -6,7 +6,7 @@ on:
       - 'docker'
 
 env:
-  image_name: 'mmyolo_custom:distill_fuserv2'
+  image_name: 'mmyolo_custom:distill_fuser-neck'
 
 jobs:
 
