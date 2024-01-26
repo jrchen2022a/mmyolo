@@ -7,6 +7,7 @@ from mmdet.utils import OptMultiConfig
 from mmengine.model import BaseModule
 
 from mmyolo.registry import MODELS
+import torch.nn.functional as F
 
 
 class ChannelAttention(BaseModule):
@@ -46,13 +47,17 @@ class ChannelAttention(BaseModule):
                 conv_cfg=None,
                 act_cfg=None))
         self.sigmoid = nn.Sigmoid()
+        self.softmax = nn.Softmax()
+        self.BN = nn.BatchNorm2d(channels)
+        self.ReLu = F.relu
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward function."""
         avgpool_out = self.fc(self.avg_pool(x))
         maxpool_out = self.fc(self.max_pool(x))
-        out = self.sigmoid(avgpool_out + maxpool_out)
-        return out
+        out = self.softmax(avgpool_out + maxpool_out)
+        out = self.ReLu(self.BN(out))
+        return out * x
 
 
 class SpatialAttention(BaseModule):

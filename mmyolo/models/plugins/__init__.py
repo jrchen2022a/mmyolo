@@ -1,4 +1,4 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-from .cbam import CBAM
+from .cbam import CBAM,ChannelAttention
 
-__all__ = ['CBAM']
+__all__ = ['CBAM', 'ChannelAttention']
