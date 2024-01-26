@@ -1,4 +1,4 @@
-_base_ = ['./distill-backbone_t-yolov8-n-fuser.py', '../students/yolov8-n-dscv2.py']
+_base_ = ['./distill-backbone_t-yolov8-n-fuser.py', '../students/yolov8-n-shufflenet.py']
 
 student = _base_.architecture
 # student.neck.init_cfg = dict(
@@ -9,3 +9,4 @@ model = dict(
     architecture=student)
 
 del student
+del _base_.architecture

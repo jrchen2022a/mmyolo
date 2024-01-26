@@ -1,6 +1,5 @@
 from typing import List, Tuple, Union
 
-from mmcv.cnn import ConvModule, DepthwiseSeparableConvModule
 from mmdet.utils import ConfigType, OptMultiConfig
 
 from mmyolo.registry import MODELS
@@ -10,10 +9,10 @@ from ..utils import make_divisible
 
 
 @MODELS.register_module()
-class DepthSeparableBackbone(YOLOv8CSPDarknet):
+class ShuffleNetBackbone(YOLOv8CSPDarknet):
 
     def __init__(self,
-                 version: str = 'v1',
+                 shuffle_arch_setting: List[dict],
                  arch: str = 'P5',
                  last_stage_out_channels: int = 1024,
                  plugins: Union[dict, List[dict]] = None,
@@ -27,7 +26,7 @@ class DepthSeparableBackbone(YOLOv8CSPDarknet):
                  act_cfg: ConfigType = dict(type='SiLU', inplace=True),
                  norm_eval: bool = False,
                  init_cfg: OptMultiConfig = None):
-        self.version = version
+        self.shuffle_arch_setting = shuffle_arch_setting
         super().__init__(
             arch=arch,
             last_stage_out_channels=last_stage_out_channels,
@@ -42,41 +41,26 @@ class DepthSeparableBackbone(YOLOv8CSPDarknet):
             norm_eval=norm_eval,
             init_cfg=init_cfg)
 
+
     def build_stage_layer(self, stage_idx: int, setting: list) -> list:
         in_channels, out_channels, _, _, use_spp = setting
         in_channels = make_divisible(in_channels, self.widen_factor)
         out_channels = make_divisible(out_channels, self.widen_factor)
         stage = []
-        if self.version == 'v1':
-            conv_layer = ConvModule(
-                in_channels,
-                out_channels,
-                kernel_size=3,
-                stride=2,
-                padding=1,
-                norm_cfg=self.norm_cfg,
-                act_cfg=self.act_cfg)
-            stage.append(conv_layer)
-            depth_separable_layer = DepthwiseSeparableConvModule(
-                out_channels,
-                out_channels,
-                kernel_size=3,
-                padding=1,
-                norm_cfg=self.norm_cfg,
-                dw_act_cfg=None,
-                act_cfg=self.act_cfg)
-            stage.append(depth_separable_layer)
-        elif self.version == 'v2':
-            depth_separable_layer = DepthwiseSeparableConvModule(
-                in_channels,
-                out_channels,
-                kernel_size=3,
-                stride=2,
-                padding=1,
-                norm_cfg=self.norm_cfg,
-                dw_act_cfg=None,
-                act_cfg=self.act_cfg)
-            stage.append(depth_separable_layer)
+        num_blocks, shuffle_block_cfg = self.shuffle_arch_setting[stage_idx]
+        for i in range(num_blocks):
+            if i == 0 : # 入口处降采样 & 通道收缩
+                shuffle_block_cfg.update(
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    stride=2)
+            else:
+                shuffle_block_cfg.update(
+                    in_channels=out_channels,
+                    out_channels=out_channels,
+                    stride=1)
+            stage.append(MODELS.build(shuffle_block_cfg))
+
         if use_spp:
             spp = SPPFBottleneck(
                 out_channels,
