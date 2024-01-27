@@ -1,5 +1,5 @@
 # 当你想调试时，_base_引入这个文件，并更改如下_base_
-_base_ = './researches/distill/students/yolov8-n-shufflenet-neck_syncbn_fast_4xb16-200e_dw.py'
+_base_ = './researches/distill/pkd/pkd-256-neck_yolov8-n-fuser_yolov8-n-shufflenet-neck_4xb16_200e_dw-uc.py'
 
 _base_.train_dataloader.batch_size = 2
 _base_.optim_wrapper.optimizer.batch_size_per_gpu = 2
