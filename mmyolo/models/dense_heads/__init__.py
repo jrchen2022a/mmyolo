@@ -6,10 +6,12 @@ from .yolov6_head import YOLOv6Head, YOLOv6HeadModule
 from .yolov7_head import YOLOv7Head, YOLOv7HeadModule, YOLOv7p6HeadModule
 from .yolov8_head import YOLOv8Head, YOLOv8HeadModule
 from .yolox_head import YOLOXHead, YOLOXHeadModule
+from .freezable_yolov8_head import FreezableYOLOv8Head
 
 __all__ = [
     'YOLOv5Head', 'YOLOv6Head', 'YOLOXHead', 'YOLOv5HeadModule',
     'YOLOv6HeadModule', 'YOLOXHeadModule', 'RTMDetHead',
     'RTMDetSepBNHeadModule', 'YOLOv7Head', 'PPYOLOEHead', 'PPYOLOEHeadModule',
-    'YOLOv7HeadModule', 'YOLOv7p6HeadModule', 'YOLOv8Head', 'YOLOv8HeadModule'
+    'YOLOv7HeadModule', 'YOLOv7p6HeadModule', 'YOLOv8Head', 'YOLOv8HeadModule',
+    'FreezableYOLOv8Head'
 ]

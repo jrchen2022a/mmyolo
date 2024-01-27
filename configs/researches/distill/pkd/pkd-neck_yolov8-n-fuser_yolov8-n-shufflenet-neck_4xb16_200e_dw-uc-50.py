@@ -7,9 +7,9 @@ _base_.visualizer.vis_backends[1].init_kwargs.name = '{{fileBasenameNoExtension}
 model = dict(
     distiller=dict(
         distill_losses=dict(
-            loss_s2=dict(type='PKDLoss', loss_weight=256),
-            loss_s3=dict(type='PKDLoss', loss_weight=256),
-            loss_s4=dict(type='PKDLoss', loss_weight=256))))
+            loss_s2=dict(type='PKDLoss', loss_weight=50),
+            loss_s3=dict(type='PKDLoss', loss_weight=50),
+            loss_s4=dict(type='PKDLoss', loss_weight=50))))
 
 del _base_.train_cfg['dynamic_intervals']
 del _base_.custom_hooks[1]

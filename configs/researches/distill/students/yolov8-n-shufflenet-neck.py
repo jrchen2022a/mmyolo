@@ -15,7 +15,7 @@ architecture = dict(
         type='ShuffleNetBackbone',
         shuffle_arch_setting=arch_setting),
     neck=dict(
-        type='YOLOv8ShufflePAFPN',
+        type='SufflePAFPN',
         shuffle_arch_setting=neck_shuffle_arch_setting))
 
 del arch_setting
