@@ -1,28 +1,13 @@
-_base_ = ['./distill-backbone_yolov8-n-fuser_yolov8-n-dscv2.py']
+_base_ = ['./distill-neck_t-yolov8-n-fuser.py',
+          '../students/yolov8-n-dscv2.py']
 
+student = _base_.architecture
+# student.neck.init_cfg = dict(
+#     type='Pretrained', prefix='neck.', checkpoint=teacher_ckpt)
+# student.bbox_head.init_cfg = dict(
+#     type='Pretrained', prefix='bbox_head.', checkpoint=teacher_ckpt)
 model = dict(
-    distiller=dict(
-        _delete_=True,
-        type='ConfigurableDistiller',
-        student_recorders=dict(
-            neck_s2=dict(type='ModuleOutputs', source='neck.out_layers.0'),
-            neck_s3=dict(type='ModuleOutputs', source='neck.out_layers.1'),
-            neck_s4=dict(type='ModuleOutputs', source='neck.out_layers.2')),
-        teacher_recorders=dict(
-            neck_s2=dict(type='ModuleOutputs', source='neck.out_layers.0'),
-            neck_s3=dict(type='ModuleOutputs', source='neck.out_layers.1'),
-            neck_s4=dict(type='ModuleOutputs', source='neck.out_layers.2')),
-        distill_losses=dict(
-            loss_s2=dict(),
-            loss_s3=dict(),
-            loss_s4=dict()),
-        loss_forward_mappings=dict(
-            loss_s2=dict(
-                preds_S=dict(from_student=True,  recorder='neck_s2'),
-                preds_T=dict(from_student=False, recorder='neck_s2')),
-            loss_s3=dict(
-                preds_S=dict(from_student=True,  recorder='neck_s3'),
-                preds_T=dict(from_student=False, recorder='neck_s3')),
-            loss_s4=dict(
-                preds_S=dict(from_student=True,  recorder='neck_s4'),
-                preds_T=dict(from_student=False, recorder='neck_s4')))))
+    architecture=student)
+
+del student
+del _base_.architecture

@@ -7,10 +7,11 @@ from .yolov6_pafpn import YOLOv6CSPRepPAFPN, YOLOv6RepPAFPN
 from .yolov7_pafpn import YOLOv7PAFPN
 from .yolov8_pafpn import YOLOv8PAFPN
 from .yolox_pafpn import YOLOXPAFPN
-from .selector_yolov8_pafpn import YOLOv8SelectorPAFPN
+from .yolov8_selector_pafpn import YOLOv8SelectorPAFPN
+from .yolov8_shuffle_pafpn import YOLOv8ShufflePAFPN
 
 __all__ = [
     'YOLOv5PAFPN', 'BaseYOLONeck', 'YOLOv6RepPAFPN', 'YOLOXPAFPN',
     'CSPNeXtPAFPN', 'YOLOv7PAFPN', 'PPYOLOECSPPAFPN', 'YOLOv6CSPRepPAFPN',
-    'YOLOv8PAFPN', 'YOLOv8SelectorPAFPN'
+    'YOLOv8PAFPN', 'YOLOv8SelectorPAFPN', 'YOLOv8ShufflePAFPN'
 ]

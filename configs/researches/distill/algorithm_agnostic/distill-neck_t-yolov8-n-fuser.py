@@ -1,4 +1,4 @@
-_base_ = ['./distill-backbone_yolov8-n-fuser_yolov8-n-dscv2.py']
+_base_ = './distill-backbone_t-yolov8-n-fuser.py'
 
 model = dict(
     distiller=dict(
