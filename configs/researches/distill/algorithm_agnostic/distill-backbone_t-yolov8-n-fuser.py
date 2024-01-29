@@ -17,27 +17,21 @@ model = dict(
     teacher_ckpt=teacher_ckpt,
     distiller=dict(
         type='ConfigurableDistiller',
-        student_recorders=dict(
-            stage_s2=dict(type='ModuleInputs', source='neck.reduce_layers.0'),
-            stage_s3=dict(type='ModuleInputs', source='neck.reduce_layers.1'),
-            stage_s4=dict(type='ModuleInputs', source='neck.reduce_layers.2')),
-        teacher_recorders=dict(
-            stage_s2=dict(type='ModuleInputs', source='neck.reduce_layers.0'),
-            stage_s3=dict(type='ModuleInputs', source='neck.reduce_layers.1'),
-            stage_s4=dict(type='ModuleInputs', source='neck.reduce_layers.2')),
+        student_recorders=dict(backbone=dict(type='ModuleOutputs', source='backbone')),
+        teacher_recorders=dict(backbone=dict(type='ModuleOutputs', source='backbone')),
         distill_losses=dict(
             loss_s2=dict(),
             loss_s3=dict(),
             loss_s4=dict()),
         loss_forward_mappings=dict(
             loss_s2=dict(
-                preds_S=dict(from_student=True,  recorder='stage_s2', data_idx=0),
-                preds_T=dict(from_student=False, recorder='stage_s2', data_idx=0)),
+                preds_S=dict(from_student=True,  recorder='backbone', data_idx=0),
+                preds_T=dict(from_student=False, recorder='backbone', data_idx=0)),
             loss_s3=dict(
-                preds_S=dict(from_student=True,  recorder='stage_s3', data_idx=0),
-                preds_T=dict(from_student=False, recorder='stage_s3', data_idx=0)),
+                preds_S=dict(from_student=True,  recorder='backbone', data_idx=1),
+                preds_T=dict(from_student=False, recorder='backbone', data_idx=1)),
             loss_s4=dict(
-                preds_S=dict(from_student=True,  recorder='stage_s4', data_idx=0),
-                preds_T=dict(from_student=False, recorder='stage_s4', data_idx=0)))))
+                preds_S=dict(from_student=True,  recorder='backbone', data_idx=2),
+                preds_T=dict(from_student=False, recorder='backbone', data_idx=2)))))
 
 find_unused_parameters = True
