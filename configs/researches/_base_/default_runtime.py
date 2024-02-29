@@ -15,7 +15,7 @@ env_cfg = dict(
     dist_cfg=dict(backend='nccl'),
 )
 
-wandb_project_name = 'research_dw_models_exp'
+wandb_project_name = 'research_dw_models_exp_v2'
 wandb_gen_project_name = 'researches_generality_test'
 wandb_standard_gen_project_name = 'researches_generality_test_standard'
 visualizer = dict(
