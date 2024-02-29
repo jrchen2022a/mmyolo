@@ -11,8 +11,9 @@ model = dict(
             loss_s3=dict(type='PKDLoss', loss_weight=50),
             loss_s4=dict(type='PKDLoss', loss_weight=50))))
 
-del _base_.train_cfg['dynamic_intervals']
-del _base_.custom_hooks[1]
-del _base_.val_interval_stage2
-del _base_.train_pipeline
-del _base_.train_pipeline_stage2
+train_batch_size_per_gpu = 8
+train_dataloader = dict(
+    batch_size=train_batch_size_per_gpu)
+optim_wrapper = dict(
+    optimizer=dict(
+        batch_size_per_gpu=train_batch_size_per_gpu))

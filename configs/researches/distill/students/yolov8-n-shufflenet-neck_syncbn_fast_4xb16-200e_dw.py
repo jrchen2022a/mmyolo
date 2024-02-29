@@ -6,3 +6,4 @@ _base_.visualizer.vis_backends[1].init_kwargs.name = '{{fileBasenameNoExtension}
 
 val_cfg = dict(type='ValLoop')
 model = _base_.architecture
+del _base_.architecture

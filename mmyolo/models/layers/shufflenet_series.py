@@ -8,6 +8,23 @@ from mmrazor.models.architectures.ops.base import BaseOP
 
 from ..utils.misc import channel_shuffle
 
+
+def build_shuffle_series(block_cfg, num_blocks, in_channels, out_channels) -> nn.Module:
+    shuffle_stage = []
+    if in_channels != out_channels:
+        shuffle_stage.append(
+            ConvModule(in_channels=in_channels,
+                       out_channels=out_channels,
+                       kernel_size=1,
+                       norm_cfg=block_cfg.norm_cfg,
+                       act_cfg=block_cfg.act_cfg))
+    for i in range(num_blocks):
+        block_cfg.update(
+            in_channels=out_channels,
+            out_channels=out_channels)
+        shuffle_stage.append(MODELS.build(block_cfg))
+    return nn.Sequential(*shuffle_stage)
+
 @MODELS.register_module()
 class ShuffleBlock(BaseOP):
     """

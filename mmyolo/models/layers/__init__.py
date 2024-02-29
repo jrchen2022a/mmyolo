@@ -7,7 +7,7 @@ from .yolo_bricks import (BepC3StageBlock, CSPLayerWithTwoConv,
                           RepStageBlock, RepVGGBlock, SPPFBottleneck,
                           SPPFCSPBlock, TinyDownSampleBlock)
 from .selector_csp_layer import (SelectorCSPLayerV2, SelectorCSPLayerWithTwoConv)
-from .shufflenet_series import (ShuffleBlock, ShuffleXception)
+from .shufflenet_series import (ShuffleBlock, ShuffleXception, build_shuffle_series)
 
 __all__ = [
     'SPPFBottleneck', 'RepVGGBlock', 'RepStageBlock', 'ExpMomentumEMA',
@@ -16,5 +16,5 @@ __all__ = [
     'EELANBlock', 'ImplicitA', 'ImplicitM', 'BepC3StageBlock',
     'CSPLayerWithTwoConv', 'DarknetBottleneck',
     'SelectorCSPLayerV2', 'SelectorCSPLayerWithTwoConv',
-    'ShuffleBlock', 'ShuffleXception'
+    'ShuffleBlock', 'ShuffleXception', 'build_shuffle_series'
 ]

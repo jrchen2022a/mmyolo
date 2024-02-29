@@ -1,10 +1,10 @@
 from typing import List
 
 from mmdet.utils import ConfigType
-
+from mmcv.cnn import ConvModule
 from mmyolo.registry import MODELS
 from . import YOLOv8CSPDarknet
-from ..layers import SPPFBottleneck
+from ..layers import SPPFBottleneck, build_shuffle_series
 from ..utils import make_divisible
 
 
@@ -26,17 +26,21 @@ class ShuffleNetBackbone(YOLOv8CSPDarknet):
         in_channels = make_divisible(in_channels, self.widen_factor)
         out_channels = make_divisible(out_channels, self.widen_factor)
         stage = []
+        conv_layer = ConvModule(
+            in_channels,
+            out_channels,
+            kernel_size=3,
+            stride=2,
+            padding=1,
+            norm_cfg=self.norm_cfg,
+            act_cfg=self.act_cfg)
+        stage.append(conv_layer)
         num_blocks, shuffle_block_cfg = self.shuffle_arch_setting[stage_idx]
-        shuffle_block_cfg.update(out_channels=out_channels,
-                                 norm_cfg=self.norm_cfg,
-                                 act_cfg=self.act_cfg)
-        for i in range(num_blocks):
-            if i == 0 : # 入口处降采样 & 通道收缩
-                shuffle_block_cfg.update(in_channels=in_channels, stride=2)
-            else:
-                shuffle_block_cfg.update(in_channels=out_channels, stride=1)
-            stage.append(MODELS.build(shuffle_block_cfg))
-
+        shuffle_block_cfg.update(norm_cfg=self.norm_cfg, act_cfg=self.act_cfg)
+        stage.append(build_shuffle_series(block_cfg=shuffle_block_cfg,
+                                          num_blocks=num_blocks,
+                                          in_channels=out_channels,
+                                          out_channels=out_channels))
         if use_spp:
             spp = SPPFBottleneck(
                 out_channels,
