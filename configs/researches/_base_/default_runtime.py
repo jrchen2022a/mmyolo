@@ -16,7 +16,7 @@ env_cfg = dict(
 )
 
 wandb_project_name = 'research_dw_models_exp_v2'
-wandb_gen_project_name = 'researches_generality_test'
+wandb_gen_project_name = 'researches_generality_test_v2'
 wandb_standard_gen_project_name = 'researches_generality_test_standard'
 visualizer = dict(
     type='mmdet.DetLocalVisualizer',
@@ -26,6 +26,7 @@ visualizer = dict(
     ],
     name='visualizer')
 work_dir_root = save_work_dir_root + wandb_project_name + '/'
+test_dir_root = './test_dirs/'+wandb_gen_project_name+'/'
 
 log_processor = dict(type='LogProcessor', window_size=50, by_epoch=True)
 

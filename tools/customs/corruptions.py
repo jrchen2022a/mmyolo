@@ -129,18 +129,16 @@ class Corruptions:
 
     @staticmethod
     def apply_snow(img, severity):
-        # ***
-        snow_count = severity * 500
-        # 创建图像副本以避免在原始图像上操作
+        snow_count = severity * random.randint(300, 500)
         img_with_snow = np.copy(img)
-
         rows, cols, _ = img.shape
 
-        # 添加雪花效果到图像副本
         for _ in range(snow_count):
             x = random.randint(0, cols - 1)
             y = random.randint(0, rows - 1)
-            img_with_snow[y, x] = [255, 255, 255]  # 在随机位置添加白色雪花点
+            size = random.randint(1, severity)  # 根据程度参数随机确定雪花的大小
+            # 在随机位置添加不同大小的雪花点
+            img_with_snow[max(0, y - size):min(rows, y + size), max(0, x - size):min(cols, x + size)] = [255, 255, 255]
 
         return img_with_snow
 
