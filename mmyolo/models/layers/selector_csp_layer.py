@@ -12,7 +12,7 @@ from . import CSPLayerWithTwoConv
 
 
 class AttentionSEblock(nn.Module):
-    def __init__(self, channels, num_outs, reduction: int = 4):  # , temperature
+    def __init__(self, channels, num_outs, reduction: int = 4, hard: bool = False):  # , temperature
         super(AttentionSEblock, self).__init__()
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
         self.fc1 = nn.Linear(channels, channels // reduction)
@@ -22,13 +22,14 @@ class AttentionSEblock(nn.Module):
         self.fc2.bias.data[1] = 2
         # self.temperature = temperature
         self.channels = channels
+        self.hard = hard
 
     def forward(self, x):
         x = self.avg_pool(x).view(-1, self.channels)
         x = self.fc1(x)
         x = self.relu(x)
         x = self.fc2(x)
-        x = F.softmax(x, dim=1)
+        x = F.gumbel_softmax(x, tau=1, hard=True) if self.hard else F.softmax(x, dim=1)
         return x
 
 
@@ -109,6 +110,7 @@ class SelectorCSPLayerWithTwoConv(CSPLayerWithTwoConv):
             in_channels: int,
             out_channels: int,
             num_selectors: int = 3,
+            selector_hard: bool = False,
             expand_ratio: float = 0.5,
             num_blocks: int = 1,
             add_identity: bool = True,  # shortcut
@@ -141,7 +143,7 @@ class SelectorCSPLayerWithTwoConv(CSPLayerWithTwoConv):
                     conv_cfg=conv_cfg,
                     norm_cfg=norm_cfg,
                     act_cfg=act_cfg) for _ in range(num_blocks)) for _ in range(num_selectors))
-        self.switch = AttentionSEblock(in_channels, num_outs=num_selectors, reduction=4)
+        self.switch = AttentionSEblock(in_channels, num_outs=num_selectors, reduction=4, hard=selector_hard)
 
     def forward(self, x: Tensor) -> Tensor:
         """Forward process."""

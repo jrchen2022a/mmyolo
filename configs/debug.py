@@ -1,4 +1,4 @@
-_base_ = '.。//researches/distill/pkd/pkd-neck_yolov8-n-fuser_yolov8-n-shufflenet-neck_mask-refine_4xb32_500e_coco-50.py'
+_base_ = 'researches/yolov8/yolov8_n_mask-refine_syncbn_fast_4xb16-200e_dw_selector-bb-neck.py'
 
 _base_.train_dataloader.batch_size = 2
 _base_.optim_wrapper.optimizer.batch_size_per_gpu = 2

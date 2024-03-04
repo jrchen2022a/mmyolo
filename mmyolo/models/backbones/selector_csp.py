@@ -126,12 +126,14 @@ SELECTOR_SETTINGS = {
     'SelectorCSPLayerWithTwoConv': SelectorCSPLayerWithTwoConv
 }
 
+
 @MODELS.register_module()
 class YOLOv8SelectorCSPDarknet(YOLOv8CSPDarknet):
 
     def __init__(self,
                  version: int = 1,  # v1:backbone的csp全加，v2:backbone的3个连接处加
                  num_selectors: int = 3,
+                 selector_hard: bool = False,
                  selector_type: str = 'SelectorCSPLayerWithTwoConv',
                  arch: str = 'P5',
                  last_stage_out_channels: int = 1024,
@@ -149,6 +151,7 @@ class YOLOv8SelectorCSPDarknet(YOLOv8CSPDarknet):
         self.version = version
         self.num_selectors = num_selectors
         self.selector = SELECTOR_SETTINGS[selector_type]
+        self.selector_hard = selector_hard
         super().__init__(
             arch=arch,
             last_stage_out_channels=last_stage_out_channels,
@@ -184,6 +187,7 @@ class YOLOv8SelectorCSPDarknet(YOLOv8CSPDarknet):
                 out_channels,
                 out_channels,
                 num_selectors=self.num_selectors,
+                selector_hard=self.selector_hard,
                 num_blocks=num_blocks,
                 add_identity=add_identity,
                 norm_cfg=self.norm_cfg,
@@ -202,6 +206,7 @@ class YOLOv8SelectorCSPDarknet(YOLOv8CSPDarknet):
                     out_channels,
                     out_channels,
                     num_selectors=self.num_selectors,
+                    selector_hard=self.selector_hard,
                     num_blocks=num_blocks,
                     add_identity=add_identity,
                     norm_cfg=self.norm_cfg,
