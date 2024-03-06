@@ -29,7 +29,7 @@ class AttentionSEblock(nn.Module):
         x = self.fc1(x)
         x = self.relu(x)
         x = self.fc2(x)
-        x = F.gumbel_softmax(x, tau=1, hard=True) if self.hard else F.softmax(x, dim=1)
+        x = F.gumbel_softmax(x*10, tau=1, hard=True) if self.hard else F.softmax(x, dim=1)
         return x
 
 
