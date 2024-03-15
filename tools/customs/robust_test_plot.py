@@ -15,28 +15,34 @@ def plot(y_clean_pre, y_noise_pre, model_name):
     plt.scatter(x, y_clean_pre)
     plt.scatter(x, y_noise_pre)
     # 绘制折线图
-    plt.plot(x, y_clean_pre, marker='o', color='b', label='原测试集')
+    plt.plot(x, y_clean_pre, marker='o', color='b', label='干净测试集')
     plt.plot(x, y_noise_pre, marker='o', color='g', label='噪声测试集')
 
     # 计算x和y的均值
     mean_clean_pre = np.mean(y_clean_pre)
+    std_clean_pre = np.std(y_clean_pre)
     mean_noise_pre = np.mean(y_noise_pre)
+    std_noise_pre = np.std(y_noise_pre)
 
     # 打印均值
-    # plt.axhline(y=mean_clean_pre, color='b', linestyle='--', label='原测试集均值')
+    print(f"{model_name} 干净数据集  均值：{mean_clean_pre:.2f}  标准差：{std_clean_pre:.2f}")
+    print(f"{model_name} 噪声数据集  均值：{mean_noise_pre:.2f}  标准差：{std_noise_pre:.2f}")
+    plt.axhline(y=mean_clean_pre, color='b', linestyle='--')
     plt.axhline(y=mean_noise_pre, color='g', linestyle='--')
 
     # 在图上添加均值标注
-    plt.annotate(f'均值：{mean_noise_pre:.2f}', xy=(4.5, mean_noise_pre), xytext=(5, 15),
+    plt.annotate(f'均值：{mean_clean_pre:.2f}%', xy=(4.5, mean_clean_pre), xytext=(-10, 15),
+                 fontproperties=legend_font_prop, textcoords='offset points', arrowprops=dict(arrowstyle='-'))
+    plt.annotate(f'均值：{mean_noise_pre:.2f}%', xy=(4.5, mean_noise_pre), xytext=(-10, 15),
                  fontproperties=legend_font_prop, textcoords='offset points', arrowprops=dict(arrowstyle='-'))
 
     # 添加标题、x轴和y轴标签
-    title = f"{model_name}对抗高斯噪声性能表现"
+    title = f"{model_name}网络的抗噪性能表现"
     plt.title(title, fontproperties=title_font_prop)
-    plt.xlabel("拟合模型", fontproperties=title_font_prop)
-    plt.ylabel("mAP", fontproperties=title_font_prop)
+    plt.xlabel("拟合网络", fontproperties=title_font_prop)
+    plt.ylabel("mAP/%", fontproperties=title_font_prop)
     plt.xticks(ticks=x, labels=x)
-    plt.ylim(0.5, 1)
+    plt.ylim(50, 100)
     plt.legend(prop=legend_font_prop)
 
     # 显示网格线
@@ -52,19 +58,15 @@ def main():
 
     parser.add_argument('--model', type=str, help='模型名称')
     parser.add_argument('--clean', type=float, nargs='+',
-                        help='原测试集表现')
+                        help='干净测试集表现')
     parser.add_argument('--noise', type=float, nargs='+',
                         help='噪声测试集表现')
 
     # 解析命令行参数
     args = parser.parse_args()
     assert len(args.clean) == 5 and len(args.noise) == 5
-    plot(args.clean, args.noise, args.model)
+    plot([x*100 for x in args.clean], [x*100 for x in args.noise], args.model)
 
 
 if __name__ == '__main__':
     main()
-
-    # --model YOLOv8-FA --clean 0.869 0.87 0.868 0.871 0.87   --noise 0.713 0.708 0.713 0.704 0.696
-    # --model YOLOv8-FS --clean 0.864 0.864 0.863 0.866 0.867 --noise 0.66 0.652 0.654 0.641 0.639
-    # --model YOLOv8    --clean 0.861 0.864 0.863 0.862 0.864 --noise 0.623 0.689 0.608 0.672 0.657
