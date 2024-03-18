@@ -111,6 +111,7 @@ class SelectorCSPLayerWithTwoConv(CSPLayerWithTwoConv):
             out_channels: int,
             num_selectors: int = 3,
             selector_hard: bool = False,
+            switch_adaptive: bool = True,
             expand_ratio: float = 0.5,
             num_blocks: int = 1,
             add_identity: bool = True,  # shortcut
@@ -144,11 +145,12 @@ class SelectorCSPLayerWithTwoConv(CSPLayerWithTwoConv):
                     norm_cfg=norm_cfg,
                     act_cfg=act_cfg) for _ in range(num_blocks)) for _ in range(num_selectors))
         self.switch = AttentionSEblock(in_channels, num_outs=num_selectors, reduction=4, hard=selector_hard)
+        self.switch_adaptive = switch_adaptive
 
     def forward(self, x: Tensor) -> Tensor:
         """Forward process."""
         x_main = self.main_conv(x)
-        x_switch = self.switch(x)
+        x_switch = self.switch(x) if self.switch_adaptive else torch.ones((x.shape[0], 3), device=x.device)/3
         x_main = list(x_main.split((self.mid_channels, self.mid_channels), 1))
         switch_res = torch.split(x_switch, 1, dim=1)
         x_extend = list()

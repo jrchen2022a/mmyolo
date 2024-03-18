@@ -18,6 +18,7 @@ class YOLOv8SelectorPAFPN(YOLOv8PAFPN):
                  out_channels: Union[List[int], int],
                  num_selectors: int = 3,
                  selector_hard: bool = False,
+                 switch_adaptive: bool = True,
                  selector_type: str = 'SelectorCSPLayerWithTwoConv',
                  deepen_factor: float = 1.0,
                  widen_factor: float = 1.0,
@@ -30,6 +31,7 @@ class YOLOv8SelectorPAFPN(YOLOv8PAFPN):
         self.num_selectors = num_selectors
         self.selector = SELECTOR_SETTINGS[selector_type]
         self.selector_hard = selector_hard
+        self.switch_adaptive = switch_adaptive
         super().__init__(
             in_channels=in_channels,
             out_channels=out_channels,
@@ -48,6 +50,7 @@ class YOLOv8SelectorPAFPN(YOLOv8PAFPN):
                 make_divisible(self.out_channels[idx - 1], self.widen_factor),
                 num_selectors=self.num_selectors,
                 selector_hard=self.selector_hard,
+                switch_adaptive=self.switch_adaptive,
                 num_blocks=make_round(self.num_csp_blocks, self.deepen_factor),
                 add_identity=False,
                 norm_cfg=self.norm_cfg,
@@ -60,6 +63,7 @@ class YOLOv8SelectorPAFPN(YOLOv8PAFPN):
                 make_divisible(self.out_channels[idx + 1], self.widen_factor),
                 num_selectors=self.num_selectors,
                 selector_hard=self.selector_hard,
+                switch_adaptive=self.switch_adaptive,
                 num_blocks=make_round(self.num_csp_blocks, self.deepen_factor),
                 add_identity=False,
                 norm_cfg=self.norm_cfg,

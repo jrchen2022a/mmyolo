@@ -134,6 +134,7 @@ class YOLOv8SelectorCSPDarknet(YOLOv8CSPDarknet):
                  version: int = 1,  # v1:backbone的csp全加，v2:backbone的3个连接处加
                  num_selectors: int = 3,
                  selector_hard: bool = False,
+                 switch_adaptive:bool = True,
                  selector_type: str = 'SelectorCSPLayerWithTwoConv',
                  arch: str = 'P5',
                  last_stage_out_channels: int = 1024,
@@ -152,6 +153,7 @@ class YOLOv8SelectorCSPDarknet(YOLOv8CSPDarknet):
         self.num_selectors = num_selectors
         self.selector = SELECTOR_SETTINGS[selector_type]
         self.selector_hard = selector_hard
+        self.switch_adaptive = switch_adaptive
         super().__init__(
             arch=arch,
             last_stage_out_channels=last_stage_out_channels,
@@ -188,6 +190,7 @@ class YOLOv8SelectorCSPDarknet(YOLOv8CSPDarknet):
                 out_channels,
                 num_selectors=self.num_selectors,
                 selector_hard=self.selector_hard,
+                switch_adaptive=self.switch_adaptive,
                 num_blocks=num_blocks,
                 add_identity=add_identity,
                 norm_cfg=self.norm_cfg,
@@ -207,6 +210,7 @@ class YOLOv8SelectorCSPDarknet(YOLOv8CSPDarknet):
                     out_channels,
                     num_selectors=self.num_selectors,
                     selector_hard=self.selector_hard,
+                    switch_adaptive=self.switch_adaptive,
                     num_blocks=num_blocks,
                     add_identity=add_identity,
                     norm_cfg=self.norm_cfg,
