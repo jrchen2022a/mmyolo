@@ -144,7 +144,8 @@ class SelectorCSPLayerWithTwoConv(CSPLayerWithTwoConv):
                     conv_cfg=conv_cfg,
                     norm_cfg=norm_cfg,
                     act_cfg=act_cfg) for _ in range(num_blocks)) for _ in range(num_selectors))
-        self.switch = AttentionSEblock(in_channels, num_outs=num_selectors, reduction=4, hard=selector_hard)
+        if switch_adaptive:
+            self.switch = AttentionSEblock(in_channels, num_outs=num_selectors, reduction=4, hard=selector_hard)
         self.switch_adaptive = switch_adaptive
 
     def forward(self, x: Tensor) -> Tensor:

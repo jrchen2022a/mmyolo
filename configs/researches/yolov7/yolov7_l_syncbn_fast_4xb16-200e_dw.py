@@ -40,9 +40,9 @@ img_scale = (640, 640)  # width, height
 # Dataset type, this will be used to define the dataset
 dataset_type = 'YOLOv5CocoDataset'
 # Batch size of a single GPU during validation
-val_batch_size_per_gpu = 1
+val_batch_size_per_gpu = 16
 # Worker to pre-fetch data for each single GPU during validation
-val_num_workers = 2
+val_num_workers = 8
 
 # Config of batch shapes. Only on val.
 # It means not used if batch_shapes_cfg is None.
