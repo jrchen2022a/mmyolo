@@ -6,13 +6,13 @@ stages_output_channels = {
     'x': [160, 320, 640, 640]
 }
 
-teacher_ckpt = 'checkpoints/yolov8-n-fuser_best-dw.pth'
+teacher_ckpt = 'checkpoints/yolov8-fa-n_best-dw.pth'
 
 model = dict(
     _scope_='mmrazor',
     type='FpnTeacherDistill',
     teacher=dict(
-        cfg_path='mmyolo::researches/yolov8/yolov8_n_syncbn_fast_4xb16-200e_dw_fuser.py',
+        cfg_path='mmyolo::researches/yolov8/yolov8_n_mask-refine_syncbn_fast_4xb16-200e_dw_fuser-bb-neck.py',
         pretrained=False),
     teacher_ckpt=teacher_ckpt,
     distiller=dict(
