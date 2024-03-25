@@ -7,8 +7,8 @@ _base_.visualizer.vis_backends[1].init_kwargs.name = '{{fileBasenameNoExtension}
 model = dict(
     distiller=dict(
         distill_losses=dict(
-            loss_s2=dict(type='ChannelWiseDivergence', tau=1, loss_weight=10),
-            loss_s3=dict(type='ChannelWiseDivergence', tau=1, loss_weight=10),
-            loss_s4=dict(type='ChannelWiseDivergence', tau=1, loss_weight=10))))
+            loss_s2=dict(type='ChannelWiseDivergence', tau=4, loss_weight=10),
+            loss_s3=dict(type='ChannelWiseDivergence', tau=4, loss_weight=10),
+            loss_s4=dict(type='ChannelWiseDivergence', tau=4, loss_weight=10))))
 
-_base_.custom_hooks.append(dict(type='DistillWeightHook', _scope_='mmrazor'))
+#_base_.custom_hooks.append(dict(type='DistillWeightHook', _scope_='mmrazor'))
