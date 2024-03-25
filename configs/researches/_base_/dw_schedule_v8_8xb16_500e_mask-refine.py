@@ -1,5 +1,7 @@
 _base_ = './dw_schedule_v8_8xb16_500e.py'
 
+del _base_.train_cfg.dynamic_intervals
+
 # This config will refine bbox by mask while loading annotations and
 # transforming after `YOLOv5RandomAffine`
 
