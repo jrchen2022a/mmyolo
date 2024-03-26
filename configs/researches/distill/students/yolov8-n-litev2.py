@@ -1,14 +1,13 @@
 _base_ = './yolov8-n.py'
 
-_SHUFFLE_BLOCK = dict(type='ShuffleBlock')
 bb_arch_setting = [
     # stage 1-4 的模块 [num, block_type]
-    [1, _SHUFFLE_BLOCK],
-    [2, _SHUFFLE_BLOCK],
-    [2, _SHUFFLE_BLOCK],
-    [1, _SHUFFLE_BLOCK]
+    dict(type='LiteBlock', num_block=1, conv_groups=8),
+    dict(type='LiteBlock', num_block=2, conv_groups=8),
+    dict(type='LiteBlock', num_block=2, conv_groups=8),
+    dict(type='LiteBlock', num_block=1, conv_groups=8)
 ]
-neck_arch_setting = [1, _SHUFFLE_BLOCK]
+neck_arch_setting = dict(type='LiteBlock', num_block=1, conv_groups=2)
 
 architecture = dict(
     backbone=dict(
@@ -23,4 +22,4 @@ architecture = dict(
 
 del bb_arch_setting
 del neck_arch_setting
-del _SHUFFLE_BLOCK
+

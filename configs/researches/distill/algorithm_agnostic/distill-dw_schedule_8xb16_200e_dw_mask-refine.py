@@ -1,6 +1,6 @@
 _base_ = '../../_base_/dw_schedule_v8_8xb16_500e_mask-refine.py'
 
-wandb_project_name = 'distill_exp_v3'
+wandb_project_name = 'distill_exp_v4'
 _base_.visualizer.vis_backends[1].init_kwargs.project = wandb_project_name
 work_dir_root = _base_.save_work_dir_root + wandb_project_name + '/'
 
