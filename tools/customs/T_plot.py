@@ -15,8 +15,8 @@ def plot(x, y):
     plt.xticks(ticks=[1.0,2.0,3.0,4.0,5.0])
     plt.yticks(ticks=[82.0, 82.5, 83.0, 83.5, 84.0, 84.5])
 
-    # 显示图形
-    plt.savefig(f"T.png")
+    # 显示图形# 显示图形
+    plt.savefig(f"T.png", dpi=300)
     plt.show()
 
 

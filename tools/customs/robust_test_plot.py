@@ -38,9 +38,8 @@ def plot(y_clean_pre, y_noise_pre, model_name):
 
     # 添加标题、x轴和y轴标签
     title = f"{model_name}网络的抗噪性能表现"
-    plt.title(title, fontproperties=title_font_prop)
     plt.xlabel("拟合网络", fontproperties=title_font_prop)
-    plt.ylabel("mAP/%", fontproperties=title_font_prop)
+    plt.ylabel("mAP(%)", fontproperties=title_font_prop)
     plt.xticks(ticks=x, labels=x)
     plt.ylim(50, 100)
     plt.legend(prop=legend_font_prop)
@@ -48,7 +47,7 @@ def plot(y_clean_pre, y_noise_pre, model_name):
     # 显示网格线
     plt.grid(True)
     # 显示图形
-    plt.savefig(f"{model_name}.png")
+    plt.savefig(f"{model_name}.png", dpi=300)
     plt.show()
 
 
