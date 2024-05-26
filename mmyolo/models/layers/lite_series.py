@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from mmcv.cnn import ConvModule, DepthwiseSeparableConvModule
+from mmcv.cnn import ConvModule
 from mmengine.model import BaseModule
 
 from mmyolo.registry import MODELS
@@ -31,6 +31,7 @@ def build_shuffle_series(block_cfg, num_blocks, in_channels, out_channels) -> nn
             out_channels=out_channels)
         shuffle_stage.append(MODELS.build(block_cfg))
     return nn.Sequential(*shuffle_stage)
+
 
 @MODELS.register_module()
 class ShuffleBlock(BaseOP):
@@ -139,26 +140,31 @@ class LiteBlock(BaseModule):
     def __init__(self,
                  in_channels,
                  out_channels,
-                 num_block:int=1,
-                 conv_groups=3,
+                 num_block: int = 1,
+                 conv_groups: int = 4,
+                 chunk_even: bool = True,
+                 dw_mode: bool = False,
                  conv_cfg=None,
                  norm_cfg=dict(type='BN'),
                  act_cfg=dict(type='ReLU'),
                  **kwargs):
-
         super(LiteBlock, self).__init__(**kwargs)
 
         self.in_conv = None \
             if in_channels == out_channels \
             else ConvModule(
-                    in_channels,
-                    out_channels,
-                    kernel_size=1,
-                    conv_cfg=conv_cfg,
-                    norm_cfg=norm_cfg,
-                    act_cfg=act_cfg)
+            in_channels,
+            out_channels,
+            kernel_size=1,
+            conv_cfg=conv_cfg,
+            norm_cfg=norm_cfg,
+            act_cfg=act_cfg)
 
-        branch_features = out_channels // 2
+        branch_features = out_channels // 2 if chunk_even \
+            else ((out_channels - 1) if dw_mode
+                  else out_channels // (conv_groups + 1) * conv_groups)
+        self.group = branch_features if dw_mode else conv_groups
+
         self.branch2 = nn.Sequential(*[
             ConvModule(
                 branch_features,
@@ -166,15 +172,19 @@ class LiteBlock(BaseModule):
                 kernel_size=3,
                 stride=1,
                 padding=1,
-                groups=conv_groups,
+                groups=self.group,
                 conv_cfg=conv_cfg,
                 norm_cfg=norm_cfg,
                 act_cfg=act_cfg) for _ in range(num_block)])
+        self.chunk_even = chunk_even
 
     def forward(self, x):
-        x1, x2 = x.chunk(2, dim=1) if self.in_conv is None else self.in_conv(x).chunk(2, dim=1)
+        cluster_count = 2 if self.chunk_even else (self.group + 1)
+        x_set = x.chunk(cluster_count, dim=1) \
+            if self.in_conv is None \
+            else self.in_conv(x).chunk(cluster_count, dim=1)
+        x1 = x_set[0]
+        x2 = torch.cat(x_set[1:], dim=1)
         out = torch.cat((x1, self.branch2(x2)), dim=1)
-        # out = self.out_conv(channel_shuffle(out, 2))
         out = channel_shuffle(out, 2)
         return out
-

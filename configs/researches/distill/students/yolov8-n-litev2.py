@@ -1,13 +1,14 @@
 _base_ = './yolov8-n.py'
 
+conv_groups = 4
+chunk_even = True
+
 bb_arch_setting = [
-    # stage 1-4 的模块 [num, block_type]
-    dict(type='LiteBlock', num_block=1, conv_groups=8),
-    dict(type='LiteBlock', num_block=2, conv_groups=8),
-    dict(type='LiteBlock', num_block=2, conv_groups=8),
-    dict(type='LiteBlock', num_block=1, conv_groups=8)
-]
-neck_arch_setting = dict(type='LiteBlock', num_block=1, conv_groups=2)
+    dict(type='LiteBlock', num_block=1, conv_groups=conv_groups, chunk_even=chunk_even),
+    dict(type='LiteBlock', num_block=2, conv_groups=conv_groups, chunk_even=chunk_even),
+    dict(type='LiteBlock', num_block=2, conv_groups=conv_groups, chunk_even=chunk_even),
+    dict(type='LiteBlock', num_block=1, conv_groups=conv_groups, chunk_even=chunk_even)]
+neck_arch_setting = dict(type='LiteBlock', num_block=1, conv_groups=conv_groups, chunk_even=chunk_even)
 
 architecture = dict(
     backbone=dict(

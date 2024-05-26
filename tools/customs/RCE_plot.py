@@ -41,7 +41,7 @@ def plot(data, models):
 
     # 调整图形布局，防止图例被遮挡
     plt.subplots_adjust(bottom=0.2, left=0.15)
-    plt.savefig(f"模型相对损坏误差.png")
+    plt.savefig(f"模型相对损坏误差.png", dpi=300)
     # 显示图形
     plt.show()
 
